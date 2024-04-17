@@ -1,0 +1,139 @@
+import { useCallback } from "react";
+import { Box, IconButton, Modal, Typography } from "@mui/material";
+import { Carousel } from 'react-responsive-carousel';
+import { Favorite as FavoriteIcon, Close as CloseIcon } from '@mui/icons-material'; // Import CloseIcon
+import Swal from "sweetalert2";
+import useWishList from "../../hooks/useWishList";
+import useAuth from "../../hooks/useAuth";
+import useCart from "../../hooks/useCart";
+
+const Modals = ({ selectedProduct, handleCloseModal }) => {
+    const [, refetchCart] = useCart();
+    const [, updateWishList] = useWishList();
+    const { user } = useAuth();
+
+    const handleWishList = useCallback((data) => {
+        const saveData = {
+            product_name: data.product_name,
+            price: data.price,
+            images: data.images
+        }
+        fetch('http://localhost:5000/wish-list', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(saveData)
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                updateWishList();
+                Swal.fire('Added To WishList');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('An error occurred. Please try again later.');
+            });
+    }, [updateWishList]);
+
+    const handleAddToCart = useCallback((data) => {
+        const saveData = {
+            product_name: data.product_name,
+            price: data.price,
+            images: data.images,
+            email: user?.email,
+            userName: user?.displayName,
+            quantity: 1
+        }
+        fetch('http://localhost:5000/carts', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(saveData)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.insertedId) {
+                    refetchCart();
+                    Swal.fire({
+                        icon: 'success',
+                        title: `'${saveData.product_name}' added on the cart.`,
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                }
+            })
+    }, [user, refetchCart]);
+
+
+    return (
+        <Modal
+            aria-labelledby="spring-modal-title"
+            aria-describedby="spring-modal-description"
+            open={selectedProduct !== null}
+            onClose={handleCloseModal}
+            closeAfterTransition
+        >
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'background.paper',
+                    p: 4,
+                }}
+                className="lg:w-[55rem]"
+            >
+                <IconButton // Close icon button
+                    sx={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        zIndex: 1,
+                    }}
+                    onClick={handleCloseModal}
+                    aria-label="close"
+                >
+                    <CloseIcon />
+                </IconButton>
+                {selectedProduct && (
+                    <div className="lg:flex gap-10 justify-center">
+                        <Carousel className='w-[250px] lg:w-10/12  mx-auto mt-8'>
+                            {selectedProduct.images.map((image, index) => (
+                                <div key={index}>
+                                    <img src={image} style={{ width: '100%', height: 'auto' }} alt={`Product Image ${index}`} />
+                                </div>
+                            ))}
+                        </Carousel>
+                        <Box>
+                            <Typography variant="h4" component="h2">
+                                <h1 className="font-bold">{selectedProduct.product_name}</h1>
+                            </Typography>
+                            <Typography sx={{ mt: 2 }}>
+                                <div dangerouslySetInnerHTML={{ __html: selectedProduct.description }}></div>
+                            </Typography>
+                            <div className="divider"></div>
+                            <Box sx={{ my: 2 }}>
+                                <p>Availability: <span className="text-green-600">{selectedProduct.stock_status}</span></p>
+                            </Box>
+                            <Typography variant="h4" component="h2">
+                                <h1 className="font-bold">${selectedProduct.price}</h1>
+                            </Typography>
+                            <Box sx={{ my: 2 }}>
+                                <button onClick={() => handleAddToCart(selectedProduct)} className="btn bg-[#CC3333] hover:bg-[#CC3333] rounded-sm px-5 py-1 font-semibold text-white">Add To Cart</button>
+                                <IconButton sx={{ mx: 2 }} aria-label="add to favorites" onClick={() => handleWishList(selectedProduct)}>
+                                    <FavoriteIcon fontSize="large" />
+                                </IconButton>
+                            </Box>
+                        </Box>
+                    </div>
+                )}
+            </Box>
+        </Modal>
+    );
+};
+
+export default Modals;
