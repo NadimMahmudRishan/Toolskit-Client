@@ -41,7 +41,7 @@ function Item(props) {
     return (
         <Paper style={{ position: 'relative', color: 'black' }}>
             <img src={image} alt={name} style={{ width: '100%', height: 'auto' }} />
-            <div className="px-32 space-y-2 lg:visible invisible absolute bottom-52">
+            <div className="px-32 space-y-2   absolute bottom-52">
                 <h1 className="text-3xl">{name}</h1>
                 <h1 className="text-3xl">{sub_title}</h1>
                 <p className="md:w-2/3">{description}</p>

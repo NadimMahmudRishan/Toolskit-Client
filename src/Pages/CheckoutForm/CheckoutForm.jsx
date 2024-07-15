@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import './Checkout.css'
 
 import { Helmet } from "react-helmet";
+import { Skeleton } from "@mui/material";
 
 const CARD_OPTIONS = {
     iconStyle: "solid",
@@ -67,7 +68,7 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
         if (price > 0) {
             const fetchClientSecret = async () => {
                 try {
-                    const response = await fetch("http://localhost:5000/create-payment-intent", {
+                    const response = await fetch("https://toold-kit-server.vercel.app/create-payment-intent", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -141,7 +142,7 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
                     type: payload.paymentMethod.type
                 };
 
-                fetch('http://localhost:5000/payments', {
+                fetch('https://toold-kit-server.vercel.app/payments', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -246,9 +247,6 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
     ) : (
 
         <div>
-            <Helmet>
-                <title>{`Payment - Goldsmith`}</title>
-            </Helmet>
             <div>
                 {processing && (
                     <div className="loader-overlay">
@@ -393,46 +391,57 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
                             {processing ? "Processing..." : `Pay $${price}`}
                         </button>
                     </form>
-                    <div className="w-[400px] bg-white shadow-lg p-8">
-                        <table className="table table-md">
-                            <thead >
-                                <tr>
-                                    <th className="text-xl">Product</th>
-                                    <th className="text-xl">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {carts.map((data, index) => (
-                                    <tr key={index}>
-                                        <td className="text-[17px]">{data.product_name} × {data.quantity}</td>
-                                        <td className="text-[17px]">{data.price * data.quantity}</td>
+                    {carts.length > 0 ? (
+                        <div className="w-[400px] bg-white shadow-lg p-8">
+                            <table className="table table-md">
+                                <thead>
+                                    <tr>
+                                        <th className="text-xl">Product</th>
+                                        <th className="text-xl">Total</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        <div className="divider"></div>
-                        <div className='flex justify-between px-2 font-semibold'>
-                            <div className="subtotal">
-                                <p>Subtotal</p>
-                                <p>Shipping</p>
-                                <p>Tax</p>
+                                </thead>
+                                <tbody>
+                                    {carts.map((data, index) => (
+                                        <tr key={index}>
+                                            <td className="text-[17px]">{data.product_name} × {data.quantity}</td>
+                                            <td className="text-[17px]">{data.price * data.quantity}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            <div className="divider"></div>
+                            <div className='flex justify-between px-2 font-semibold'>
+                                <div className="subtotal">
+                                    <p>Subtotal</p>
+                                    <p>Shipping</p>
+                                    <p>Tax</p>
+                                </div>
+                                <div className="shipping">
+                                    <p>: ${price.toFixed(2) - 25}</p>
+                                    <p>: $25.00</p>
+                                    <p>: $0.00</p>
+                                </div>
                             </div>
-                            <div className="shipping">
-                                <p>: ${price.toFixed(2) - 25}</p>
-                                <p>: $25.00</p>
-                                <p>: $0.00</p>
+                            <div className="divider"></div>
+                            <div className="flex justify-between px-2 font-semibold text-2xl">
+                                <p>Total</p>
+                                <p>: ${total.toFixed(2)}</p>
                             </div>
                         </div>
-                        <div className="divider"></div>
-                        <div className="flex justify-between px-2 font-semibold text-2xl">
-                            <p>Total</p>
-                            <p>: ${total.toFixed(2)}</p>
+                    ) : (
+                        // Skeleton loader when carts data is loading
+                        <div className="w-[400px] bg-white shadow-lg p-8">
+                            <Skeleton variant="text" height={30} />
+                            <Skeleton variant="text" height={30} />
+                            <Skeleton variant="text" height={30} />
+                            <Skeleton variant="text" height={30} />
+                            <Skeleton variant="text" height={30} />
+                            <Skeleton variant="rectangular" height={100} />
                         </div>
-                    </div>
-
+                    )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

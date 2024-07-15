@@ -54,7 +54,7 @@ const ManageProduct = () => {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`http://localhost:5000/delete-product/${id}`, {
+                fetch(`https://toold-kit-server.vercel.app/delete-product/${id}`, {
                     method: 'DELETE'
                 })
                     .then(res => res.json())
@@ -106,7 +106,7 @@ const ManageProduct = () => {
                 if (result.isConfirmed) {
                     // Perform delete operation for all selected items
                     Promise.all(selectedItems.map(id => {
-                        return fetch(`http://localhost:5000/delete-product/${id}`, {
+                        return fetch(`https://toold-kit-server.vercel.app/delete-product/${id}`, {
                             method: 'DELETE'
                         }).then(res => res.json());
                     })).then(results => {

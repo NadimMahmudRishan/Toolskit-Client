@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import useWishList from "../../hooks/useWishList";
 import useAuth from "../../hooks/useAuth";
 import useCart from "../../hooks/useCart";
+import { Link } from "react-router-dom";
 
 const Modals = ({ selectedProduct, handleCloseModal }) => {
     const [, refetchCart] = useCart();
@@ -18,7 +19,7 @@ const Modals = ({ selectedProduct, handleCloseModal }) => {
             price: data.price,
             images: data.images
         }
-        fetch('http://localhost:5000/wish-list', {
+        fetch('https://toold-kit-server.vercel.app/wish-list', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -46,7 +47,7 @@ const Modals = ({ selectedProduct, handleCloseModal }) => {
             userName: user?.displayName,
             quantity: 1
         }
-        fetch('http://localhost:5000/carts', {
+        fetch('https://toold-kit-server.vercel.app/carts', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -67,7 +68,7 @@ const Modals = ({ selectedProduct, handleCloseModal }) => {
             })
     }, [user, refetchCart]);
 
-
+    
     return (
         <Modal
             aria-labelledby="spring-modal-title"
@@ -83,9 +84,9 @@ const Modals = ({ selectedProduct, handleCloseModal }) => {
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
                     bgcolor: 'background.paper',
-                    p: 4,
+                    p: 6,
                 }}
-                className="lg:w-[55rem]"
+                className="lg:w-[55rem] h-[44rem]"
             >
                 <IconButton // Close icon button
                     sx={{
@@ -101,19 +102,19 @@ const Modals = ({ selectedProduct, handleCloseModal }) => {
                 </IconButton>
                 {selectedProduct && (
                     <div className="lg:flex gap-10 justify-center">
-                        <Carousel className='w-[250px] lg:w-10/12  mx-auto mt-8'>
+                        <Carousel className='lg:w-6/12 w-56 mx-auto lg:mt-8'>
                             {selectedProduct.images.map((image, index) => (
                                 <div key={index}>
-                                    <img src={image} style={{ width: '100%', height: 'auto' }} alt={`Product Image ${index}`} />
+                                    <img src={image} className="w-96" alt={`Product Image ${index}`} />
                                 </div>
                             ))}
                         </Carousel>
                         <Box>
-                            <Typography variant="h4" component="h2">
-                                <h1 className="font-bold">{selectedProduct.product_name}</h1>
+                            <Typography>
+                                <h1 className="text-xl lg:text-4xl font-bold">{selectedProduct.product_name}</h1>
                             </Typography>
                             <Typography sx={{ mt: 2 }}>
-                                <div dangerouslySetInnerHTML={{ __html: selectedProduct.description }}></div>
+                                <div className="hidden lg:flex" dangerouslySetInnerHTML={{ __html: selectedProduct.description }}></div>
                             </Typography>
                             <div className="divider"></div>
                             <Box sx={{ my: 2 }}>
@@ -127,6 +128,9 @@ const Modals = ({ selectedProduct, handleCloseModal }) => {
                                 <IconButton sx={{ mx: 2 }} aria-label="add to favorites" onClick={() => handleWishList(selectedProduct)}>
                                     <FavoriteIcon fontSize="large" />
                                 </IconButton>
+                                <button className="bg-black text-white font-semibold py-2 px-7 border border-white hover:border-transparent rounded">
+                                    <Link to={`/details/${selectedProduct._id}`}>Read more</Link>
+                                </button>
                             </Box>
                         </Box>
                     </div>

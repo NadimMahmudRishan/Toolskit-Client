@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, } from 'react';
 import useCart from "../../hooks/useCart";
-import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, IconButton, } from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, IconButton, Skeleton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Swal from "sweetalert2";
 import { Link } from 'react-router-dom';
 
 const ShoppingCart = () => {
-    const [carts, refetch] = useCart();
+    const [carts, refetch, isLoading] = useCart();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [quantities, setQuantities] = useState({});
@@ -14,10 +14,6 @@ const ShoppingCart = () => {
     const Shipping = 25;
     const [total, setTotal] = useState(subtotal + Shipping);
 
-    useEffect(() => {
-        calculateSubtotal();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [carts, quantities]);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -39,7 +35,7 @@ const ShoppingCart = () => {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`http://localhost:5000/carts/${id}`, {
+                fetch(`https://toold-kit-server.vercel.app/carts/${id}`, {
                     method: 'DELETE'
                 })
                     .then(res => res.json())
@@ -68,7 +64,7 @@ const ShoppingCart = () => {
     };
 
     const updateCart = (id, quantity) => {
-        fetch(`http://localhost:5000/carts/${id}`, {
+        fetch(`https://toold-kit-server.vercel.app/carts/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -114,7 +110,7 @@ const ShoppingCart = () => {
 
     return (
         <div className="mx-40 my-10">
-            <h1>This is ShoppingCart</h1>
+            <h1 className="text-4xl font-bold pb-5">Shopping Cart</h1>
             <Table>
                 <TableHead sx={{ backgroundColor: 'white' }}>
                     <TableRow className='bg-base-200'>
@@ -126,30 +122,67 @@ const ShoppingCart = () => {
                     </TableRow>
                 </TableHead>
                 <TableBody sx={{ backgroundColor: 'white' }}>
-                    {carts
-                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                        .map((cartItem) => (
-                            <TableRow key={cartItem._id}>
+                    {isLoading ? (
+                        // Skeleton Loading while data is loading
+                        Array.from(new Array(rowsPerPage)).map((_, index) => (
+                            <TableRow key={index}>
                                 <TableCell>
-                                    <img src={cartItem.images[0]} alt={cartItem.name} style={{ width: "50px", height: "50px" }} />
+                                    <Skeleton variant="rectangular" width={50} height={50} />
                                 </TableCell>
-                                <TableCell>{cartItem.product_name}</TableCell>
                                 <TableCell>
-                                    <div className="flex items-center">
-                                        <button className="px-2 py-1 border border-gray-300 rounded-l" onClick={() => handleDecrement(cartItem._id, cartItem.quantity)}>-</button>
-                                        <input defaultValue={cartItem.quantity} type="" className="w-16 px-2 py-1 text-center border-t border-b border-gray-300" value={quantities[cartItem._id] || (cartItem.quantity || 1)} onChange={(event) => handleQuantityChange(cartItem._id, event)} min="1" />
-                                        <button className="px-2 py-1 border border-gray-300 rounded-r" onClick={() => handleIncrement(cartItem._id, cartItem.quantity)}>+</button>
-                                    </div>
+                                    <Skeleton />
                                 </TableCell>
-                                <TableCell>{cartItem.price * (quantities[cartItem._id] || cartItem.quantity || 1)}</TableCell>
                                 <TableCell>
-                                    <IconButton onClick={() => handleDelete(cartItem._id)}>
-                                        <DeleteIcon />
-                                    </IconButton>
+                                    <Skeleton />
+                                </TableCell>
+                                <TableCell>
+                                    <Skeleton />
+                                </TableCell>
+                                <TableCell>
+                                    <Skeleton />
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        ))
+                    ) : (
+                        // Render actual cart items when data is loaded
+                        carts && carts.length > 0 ?
+                            carts
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((cartItem) => (
+                                    <TableRow key={cartItem._id}>
+                                        <TableCell>
+                                            <img src={cartItem.images[0]} alt={cartItem.product_name} style={{ width: "50px", height: "50px" }} />
+                                        </TableCell>
+                                        <TableCell>{cartItem.product_name}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center">
+                                                <button className="px-2 py-1 border border-gray-300 rounded-l" onClick={() => handleDecrement(cartItem._id, cartItem.quantity)}>-</button>
+                                                <input
+                                                    defaultValue={cartItem.quantity}
+                                                    type="number"
+                                                    className="w-16 px-2 py-1 text-center border-t border-b border-gray-300"
+                                                    value={quantities[cartItem._id] || cartItem.quantity || 1}
+                                                    onChange={(event) => handleQuantityChange(cartItem._id, event)}
+                                                    min="1"
+                                                />
+                                                <button className="px-2 py-1 border border-gray-300 rounded-r" onClick={() => handleIncrement(cartItem._id, cartItem.quantity)}>+</button>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>${(cartItem.price * (quantities[cartItem._id] || cartItem.quantity || 1)).toFixed(2)}</TableCell>
+                                        <TableCell>
+                                            <IconButton onClick={() => handleDelete(cartItem._id)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                <TableRow>
+                                    <TableCell colSpan={5}>No items in the cart</TableCell>
+                                </TableRow>
+                            )
+                    )}
                 </TableBody>
+
             </Table>
             <TablePagination
                 sx={{ backgroundColor: 'white' }}
@@ -186,7 +219,7 @@ const ShoppingCart = () => {
                             </tbody>
                         </table>
                         <p className="text-muted"><span className='text-[#CC3333]'>* </span>Shipping costs may vary based on location.</p>
-                        <Link to='/checkOut'  className="btn bg-[#CC3333] hover:bg-[#CC3333] btn-xl btn-block text-white rounded-sm">Proceed to Checkout</Link>
+                        <Link to='/checkOut' className="btn bg-[#CC3333] hover:bg-[#CC3333] btn-xl btn-block text-white rounded-sm">Proceed to Checkout</Link>
                     </div>
                 </div>
             </div>

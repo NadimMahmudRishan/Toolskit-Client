@@ -18,6 +18,10 @@ import WishList from "../Pages/WishList/WishList";
 import ShoppingCart from "../Pages/ShoppingCart/ShoppingCart";
 import MyPayments from "../Pages/MyPayments/MyPayments";
 import Search from "../Pages/Search/Search";
+import AdminRoute from "./AdminRoute";
+import Details from "../Pages/Deatils/Details";
+import Blog from "../Pages/Blog/Blog";
+import Contact from "../Pages/Conatct/Conatct";
 
 
 const router = createBrowserRouter([
@@ -62,6 +66,19 @@ const router = createBrowserRouter([
                 path: 'search',
                 element: <Search></Search>
             },
+            {
+                path: 'details/:id',
+                element: <Details></Details>,
+                loader: ({ params }) => fetch(`https://toold-kit-server.vercel.app/collection/${params.id}`)
+            },
+            {
+                path: 'blog',
+                element: <Blog></Blog>
+            },
+            {
+                path: 'contact',
+                element: <Contact></Contact>
+            }
         ]
     },
     {
@@ -70,19 +87,19 @@ const router = createBrowserRouter([
         children: [
             {
                 path: 'adminHome',
-                element: <AdminHome></AdminHome>
+                element: <AdminRoute><AdminHome></AdminHome></AdminRoute>
             },
             {
                 path: 'manageUsers',
-                element: <ManageUser></ManageUser>
+                element: <AdminRoute><ManageUser></ManageUser></AdminRoute>
             },
             {
                 path: 'addProduct',
-                element: <AddProduct></AddProduct>
+                element: <AdminRoute><AddProduct></AddProduct></AdminRoute>
             },
             {
                 path: 'manageProduct',
-                element: <ManageProduct></ManageProduct>
+                element: <AdminRoute><ManageProduct></ManageProduct></AdminRoute>
             }
 
         ]

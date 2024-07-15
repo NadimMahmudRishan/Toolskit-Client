@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Box, Card, CardContent, CardActions, IconButton, Typography, CardMedia } from '@mui/material';
+import { Box, Card, CardContent, CardActions, IconButton, Typography, CardMedia, Skeleton, CardActionArea } from '@mui/material';
 import { Favorite as FavoriteIcon, AspectRatio as AspectRatioIcon, ShoppingCartCheckout as ShoppingCartCheckoutIcon } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import useAxios from '../../../hooks/useAxios';
@@ -10,8 +10,6 @@ import useWishList from '../../../hooks/useWishList';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import Modals from '../../../components/Modals/Modals';
-
-
 
 export default function FeaturedProducts() {
     const { user } = useAuth();
@@ -32,7 +30,6 @@ export default function FeaturedProducts() {
         },
     });
 
-
     const handleOpenModal = (product) => {
         setSelectedProduct(product);
     };
@@ -45,9 +42,11 @@ export default function FeaturedProducts() {
         const saveData = {
             product_name: data.product_name,
             price: data.price,
-            images: data.images
+            images: data.images,
+            email: user?.email,
+            userName: user?.displayName,
         }
-        fetch('http://localhost:5000/wish-list', {
+        fetch('https://toold-kit-server.vercel.app/wish-list', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -64,7 +63,7 @@ export default function FeaturedProducts() {
                 console.error('Error:', error);
                 Swal.fire('An error occurred. Please try again later.');
             });
-    }, [updateWishList]);
+    }, [user, updateWishList]);
 
     const handleAddToCart = useCallback((data) => {
         const saveData = {
@@ -75,7 +74,7 @@ export default function FeaturedProducts() {
             userName: user?.displayName,
             quantity: 1
         }
-        fetch('http://localhost:5000/carts', {
+        fetch('https://toold-kit-server.vercel.app/carts', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -133,7 +132,7 @@ export default function FeaturedProducts() {
                             max: 464,
                             min: 0
                         },
-                        items: 1,
+                        items: 2,
                         partialVisibilityGutter: 30
                     },
                     tablet: {
@@ -153,25 +152,52 @@ export default function FeaturedProducts() {
                 sliderClass=""
                 slidesToSlide={1}
                 swipeable
-
             >
-                {collection.map((product, index) => (
-                    <>
-                        <Card key={index} sx={{ maxWidth: 310 }} className='border-[1px] border-gray-300'>
-                            <CardContent sx={{ maxWidth: 280 }}>
-                                <CardMedia
-                                    component="img"
-                                    height="194"
-                                    image={product.images[0]}
-                                    alt="Paella dish"
-                                />
-                                <Typography variant="h6" component="h2">
-                                    {product.product_name}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    <div dangerouslySetInnerHTML={{ __html: product.description }}></div>
-                                </Typography>
-                            </CardContent>
+                {isLoading ? (
+                    Array.from(new Array(8)).map((_, index) => (
+                        <Card key={index} sx={{ maxWidth: 345 }} className='border-[1px] border-gray-300'>
+                            <CardActionArea>
+                                <Skeleton variant="rectangular" />
+                                <CardContent>
+                                    <Skeleton variant="text" />
+                                    <Skeleton variant="text" />
+                                    <Skeleton variant="text" />
+                                </CardContent>
+                            </CardActionArea>
+                            <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
+                                <Box>
+                                    <IconButton aria-label="add to favorites">
+                                        <FavoriteIcon />
+                                    </IconButton>
+                                    <IconButton aria-label="share">
+                                        <ShoppingCartCheckoutIcon />
+                                    </IconButton>
+                                </Box>
+                                <IconButton aria-label="modal">
+                                    <AspectRatioIcon />
+                                </IconButton>
+                            </CardActions>
+                        </Card>
+                    ))
+                ) : (
+                    collection.map((product, index) => (
+                        <Card key={index}  className='border-[1px] border-gray-300 w-40 h-full lg:w-72'>
+                            <CardActionArea>
+                                <CardContent>
+                                    <CardMedia
+                                        className=''
+                                        component="img"
+                                        image={product.images[0]}
+                                        alt="Paella dish"
+                                    />
+                                    <Typography className='text-sm'>
+                                        {product.product_name}
+                                    </Typography>
+                                    <Typography className='hidden lg:flex' variant="body2" color="text.secondary">
+                                        <div className='my-4' dangerouslySetInnerHTML={{ __html: product.description }}></div>
+                                    </Typography>
+                                </CardContent>
+                            </CardActionArea>
                             <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
                                 <Box>
                                     <IconButton aria-label="add to favorites" onClick={() => handleWishList(product)}>
@@ -186,10 +212,10 @@ export default function FeaturedProducts() {
                                 </IconButton>
                             </CardActions>
                         </Card>
-                    </>
-                ))}
+                    ))
+                )}
             </Carousel>
-           <Modals selectedProduct={selectedProduct} handleCloseModal={handleCloseModal}></Modals>
+            <Modals selectedProduct={selectedProduct} handleCloseModal={handleCloseModal}></Modals>
         </div>
     );
 }

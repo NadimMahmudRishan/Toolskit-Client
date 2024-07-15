@@ -5,11 +5,10 @@ import AddHomeIcon from '@mui/icons-material/AddHome';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
-// import useAdmin from "../../hooks/useAdmin";
+import useAdmin from "../../hooks/useAdmin";
 
 const ListRoute = () => {
-    // const [isAdmin] = useAdmin();
-    const isAdmin = true;
+    const [isAdmin] = useAdmin()
     return (
         <List>
             {isAdmin && (

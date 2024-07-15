@@ -9,10 +9,10 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Badge, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu } from '@mui/material';
+import { Badge, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, } from '@mui/material';
 import useAuth from '../../../hooks/useAuth';
 import { MdClose, MdContacts, MdDashboard, MdDomain, MdExitToApp } from 'react-icons/md';
-import { IoHome, IoNotificationsCircle } from 'react-icons/io5';
+import { IoHome } from 'react-icons/io5';
 import useAdmin from '../../../hooks/useAdmin';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -195,14 +195,6 @@ function ResponsiveAppBar(props) {
         setTopDrawerOpen(!isTopDrawerOpen);
     };
 
-    // const [isLoading, setLoading] = React.useState(false);
-
-    // const handleSearch = (event) => {
-    //     event.preventDefault();
-    //     const searchValue = event.target.search.value;
-    //     console.log(searchValue);
-    // };
-
     const TopDrawerContent = (
         <Box className='lg:min-h-[450px] min-h-[180px]' sx={{ width: '100%', }} role="presentation">
 
@@ -216,6 +208,7 @@ function ResponsiveAppBar(props) {
     };
 
     const [carts] = useCart();
+
     const [anchorElNotificationDoctor, setAnchorElNotificationDoctor] = React.useState(null);
 
     const handleOpenNotificationMenuDoctor = (event) => {
@@ -226,11 +219,11 @@ function ResponsiveAppBar(props) {
         setAnchorElNotificationDoctor(null);
     };
 
-    // Calculate subtotal
-    const subtotal = carts.reduce((acc, item) => acc + (item.quantity || 1) * item.price, 0);
+    /// Calculate subtotal
+    const subtotal = carts && carts.length > 0 ? carts.reduce((acc, item) => acc + (item.quantity || 1) * item.price, 0) : 0;
 
     // Calculate total (subtotal + shipping)
-    const total = subtotal + 25; // Assuming shipping is $25. You can replace it with your actual shipping cost.
+    const total = subtotal + 25;
 
 
     return (
@@ -311,7 +304,7 @@ function ResponsiveAppBar(props) {
                         <Button
                             sx={{ my: 2, color: 'white', fontFamily: 700, display: 'block' }}
                         >
-                            <Link to="/Career" style={{ textDecoration: 'none', color: 'inherit' }}>Blog</Link>
+                            <Link to="/blog" style={{ textDecoration: 'none', color: 'inherit' }}>Blog</Link>
                         </Button>
                         <Button
                             sx={{ my: 2, color: 'white', fontFamily: 700, display: 'block' }}
@@ -367,23 +360,30 @@ function ResponsiveAppBar(props) {
                             open={Boolean(anchorElNotificationDoctor)}
                             onClose={handleCloseNotificationMenuDoctor}
                         >
+
                             <div className="cart-menu" style={{ width: '340px' }}>
                                 <div className="p-2">
-                                    {carts.map(data => (
-                                        <div key={data._id} className="flex gap-1 mb-2 items-center cursor-pointer hover:bg-gray-100 rounded-md p-2">
-                                            <div className="cart-item-img">
-                                                <img src={data.images[0]} alt="Electric Planer" className="w-28 h-20" />
-                                            </div>
-                                            <div className="cart-item-info">
-                                                <p className="font-bold text-[17px]">{data.product_name}</p>
-                                                <p className="text-sm">Color: Yellow</p>
-                                                <p className="text-sm">Material: Aluminium</p>
-                                                <p className="text-sm">{data.quantity || 1} × ${data.price}</p>
-                                            </div>
+                                    {carts && carts.length > 0 ? (
+                                        <div>
+                                            {carts.map((data) => (
+                                                <div key={data._id} className="flex gap-1 mb-2 items-center cursor-pointer hover:bg-gray-100 rounded-md p-2">
+                                                    <div className="cart-item-img">
+                                                        <img src={data.images[0]} alt="Electric Planer" className="w-28 h-20" />
+                                                    </div>
+                                                    <div className="cart-item-info">
+                                                        <p className="font-bold text-[17px]">{data.product_name}</p>
+                                                        <p className="text-sm">Color: Yellow</p>
+                                                        <p className="text-sm">Material: Aluminium</p>
+                                                        <p className="text-sm">{data.quantity || 1} × ${data.price}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
+                                    ) : (
+                                        <p className='text-xl text-center py-20'>No items in the cart</p>
+                                    )}
 
+                                </div>
                                 <div className='flex justify-between px-10 font-bold'>
                                     <div className="subtotal">
                                         <p>Subtotal</p>
@@ -409,7 +409,6 @@ function ResponsiveAppBar(props) {
                                     </div>
                                 </div>
                             </div>
-
                         </Menu>
                     </Box>
                     <Box sx={{ flexGrow: 0, display: { xs: 'flex', md: 'none' } }}>

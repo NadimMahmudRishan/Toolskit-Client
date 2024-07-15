@@ -15,7 +15,7 @@ const LatestNews = () => {
     return (
         <div>
             <div className='flex'>
-                <h1 className='text-xl font-bold'>Latest News</h1>
+                <h1 className='text-xl font-bold pb-5 lg:pb-0'>Latest News</h1>
             </div>
             <Carousel
                 additionalTransfrom={0}
@@ -68,7 +68,7 @@ const LatestNews = () => {
                 slidesToSlide={1}
                 swipeable
             >
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none">
                     <figure><img src={p1} alt="Movie" /></figure>
                     <div className="card-body">
                         <h2 className="card-title">A Digital Circuit Is Typically
@@ -81,7 +81,7 @@ const LatestNews = () => {
                         </p>
                     </div>
                 </div>
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none">
                     <figure><img src={p2} alt="Movie" /></figure>
                     <div className="card-body">
                         <h2 className="card-title">A Digital Circuit Is Typically
@@ -94,7 +94,7 @@ const LatestNews = () => {
                         </p>
                     </div>
                 </div>
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none">
                     <figure><img src={p3} alt="Movie" /></figure>
                     <div className="card-body">
                         <h2 className="card-title">A Digital Circuit Is Typically
@@ -107,7 +107,7 @@ const LatestNews = () => {
                         </p>
                     </div>
                 </div>
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none">
                     <figure><img src={p4} alt="Movie" /></figure>
                     <div className="card-body">
                         <h2 className="card-title">A Digital Circuit Is Typically
@@ -120,7 +120,7 @@ const LatestNews = () => {
                         </p>
                     </div>
                 </div>
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none">
                     <figure><img src={p5} alt="Movie" /></figure>
                     <div className="card-body">
                         <h2 className="card-title">A Digital Circuit Is Typically
@@ -133,7 +133,7 @@ const LatestNews = () => {
                         </p>
                     </div>
                 </div>
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none">
                     <figure><img src={p7} alt="Movie" /></figure>
                     <div className="card-body">
                         <h2 className="card-title">A Digital Circuit Is Typically
@@ -146,7 +146,7 @@ const LatestNews = () => {
                         </p>
                     </div>
                 </div>
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none">
                     <figure><img src={p8} alt="Movie" /></figure>
                     <div className="card-body">
                         <h2 className="card-title">A Digital Circuit Is Typically
@@ -159,7 +159,7 @@ const LatestNews = () => {
                         </p>
                     </div>
                 </div>
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none">
                     <figure><img src={p9} alt="Movie" /></figure>
                     <div className="card-body">
                         <h2 className="card-title">A Digital Circuit Is Typically

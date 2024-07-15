@@ -82,7 +82,7 @@ const AddProduct = () => {
         try {
             const price = parseFloat(data.Price);
             const category = data.category.toUpperCase();
-            const response = await axios.post('http://localhost:5000/products', {
+            const response = await axios.post('https://toold-kit-server.vercel.app/products', {
                 product_name: data.Product_Name,
                 price: price,
                 quantity: data.Quantity,
@@ -108,9 +108,6 @@ const AddProduct = () => {
 
     return (
         <div className="min-h-screen p-4 mt-16">
-            <Helmet>
-                <title>{`Add Product - DailyBazar`}</title>
-            </Helmet>
             <div className="lg:w-3/4 mx-auto bg-white p-10">
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Grid container spacing={2}>

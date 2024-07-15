@@ -9,7 +9,7 @@ const SmallNav = () => {
         event.preventDefault();
         const searchValue = event.target.search.value;
         setLoading(true)
-        fetch(`http://localhost:5000/product?product_name=${searchValue}`)
+        fetch(`https://toold-kit-server.vercel.app/product?product_name=${searchValue}`)
             .then((res) => res.json())
             .then((data) => {
                 console.log(data)

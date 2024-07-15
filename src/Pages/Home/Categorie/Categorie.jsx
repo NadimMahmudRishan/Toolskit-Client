@@ -8,19 +8,14 @@ import c6 from '../../../assets/category/category-6.jpg';
 
 const Categorie = () => {
     return (
-        <div className='my-20'>
+        <div className='my-20 mx-1'>
             <div className='flex'>
                 <h1 className='text-xl font-bold py-5'>Popular Categories</h1>
             </div>
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={6} md={4}>
-                    <Card sx={{ display: 'flex', width: 420 }}>
-                        <CardMedia
-                            component="img"
-                            sx={{ width: 200 }}
-                            image={c1}
-                            alt="Category 1"
-                        />
+                    <Card className='flex p-4 items-center'>
+                        <img className='w-40 h-40' src={c1} alt="" />
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h6">
@@ -38,13 +33,8 @@ const Categorie = () => {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <Card sx={{ display: 'flex', width: 420 }}>
-                        <CardMedia
-                            component="img"
-                            sx={{ width: 200 }}
-                            image={c2}
-                            alt="Category 2"
-                        />
+                    <Card className='flex p-3 items-center'>
+                        <img className='w-40 h-40' src={c2} alt="" />
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h6">
@@ -62,13 +52,8 @@ const Categorie = () => {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <Card sx={{ display: 'flex', width: 420 }}>
-                        <CardMedia
-                            component="img"
-                            sx={{ width: 200 }}
-                            image={c4}
-                            alt="Category 3"
-                        />
+                    <Card className='flex p-3 items-center'>
+                        <img className='w-40 h-40' src={c4} alt="" />
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h6">
@@ -86,13 +71,8 @@ const Categorie = () => {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <Card sx={{ display: 'flex', width: 420 }}>
-                        <CardMedia
-                            component="img"
-                            sx={{ width: 200 }}
-                            image={c3}
-                            alt="Category 3"
-                        />
+                    <Card className='flex p-3 items-center'>
+                        <img className='w-40 h-40' src={c3} alt="" />
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h6">
@@ -110,13 +90,8 @@ const Categorie = () => {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <Card sx={{ display: 'flex', width: 420 }}>
-                        <CardMedia
-                            component="img"
-                            sx={{ width: 200 }}
-                            image={c5}
-                            alt="Category 3"
-                        />
+                    <Card className='flex p-3 items-center'>
+                        <img className='w-40 h-40' src={c5} alt="" />
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h6">
@@ -134,13 +109,8 @@ const Categorie = () => {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <Card sx={{ display: 'flex', width: 420 }}>
-                        <CardMedia
-                            component="img"
-                            sx={{ width: 200 }}
-                            image={c6}
-                            alt="Category 3"
-                        />
+                    <Card className='flex p-3 items-center'>
+                        <img className='w-40 h-40' src={c6} alt="" />
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h6">

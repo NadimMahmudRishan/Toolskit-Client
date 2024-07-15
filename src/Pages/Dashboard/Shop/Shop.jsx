@@ -17,14 +17,13 @@ import useCart from '../../../hooks/useCart';
 import useWishList from '../../../hooks/useWishList';
 import Modals from '../../../components/Modals/Modals';
 import SectionTitle from '../../../components/SectionTitle/SectionTitle';
+import Skeleton from '@mui/material/Skeleton';
 
 export default function RecipeReviewCard() {
     const { user } = useAuth();
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [, refetch] = useCart();
     const [, updateWishList] = useWishList();
-
-
 
     const [axiosSecure] = useAxios();
     const { data: collection = [], isLoading } = useQuery({
@@ -39,8 +38,6 @@ export default function RecipeReviewCard() {
         },
     });
 
-
-
     const handleOpenModal = (product) => {
         setSelectedProduct(product);
     };
@@ -49,14 +46,15 @@ export default function RecipeReviewCard() {
         setSelectedProduct(null);
     };
 
-
     const handleWishList = (data) => {
         const saveData = {
             product_name: data.product_name,
             price: data.price,
-            images: data.images
+            images: data.images,
+            email: user?.email,
+            userName: user?.displayName,
         }
-        fetch('http://localhost:5000/wish-List', {
+        fetch('https://toold-kit-server.vercel.app/wish-List', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -75,7 +73,6 @@ export default function RecipeReviewCard() {
             });
     };
 
-
     const handleAddToCart = (data) => {
         const saveData = {
             product_name: data.product_name,
@@ -85,7 +82,7 @@ export default function RecipeReviewCard() {
             userName: user?.displayName,
             quantity: 1
         }
-        fetch('http://localhost:5000/carts', {
+        fetch('https://toold-kit-server.vercel.app/carts', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -110,37 +107,67 @@ export default function RecipeReviewCard() {
         <div className='min-h-screen mb-20'>
             <SectionTitle heading="Shop" subHeading='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in feugiat lorem.'></SectionTitle>
             <Grid sx={{ maxWidth: 1300, mx: 'auto' }} container spacing={4}>
-                {collection.map((product, index) => (
-                    <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
-                        <Card sx={{ maxWidth: 380 }}>
-                            <CardMedia
-                                component="img"
-                                height="194"
-                                image={product.images[0]}
-                                alt="Paella dish"
-                            />
-                            <CardContent sx={{ maxWidth: 290 }}>
-                                <h1>{product.product_name}</h1>
-                                <Typography variant="body2" color="text.secondary">
-                                    <div dangerouslySetInnerHTML={{ __html: product.description }} ></div>
-                                </Typography>
-                            </CardContent>
-                            <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
-                                <Box>
-                                    <IconButton aria-label="add to favorites">
-                                        <FavoriteIcon onClick={() => handleWishList(product)} />
+                {isLoading ? (
+                    // Show Skeleton Loading when data is loading
+                    Array.from(new Array(8)).map((_, index) => (
+                        <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
+                            <Card className='w-80 lg:w-full'>
+                                <Skeleton variant="rectangular" height={194} />
+                                <CardContent>
+                                    <Skeleton variant="text" />
+                                    <Skeleton variant="text" />
+                                    <Skeleton variant="text" />
+                                </CardContent>
+                                <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
+                                    <Box>
+                                        <IconButton aria-label="add to favorites">
+                                            <FavoriteIcon />
+                                        </IconButton>
+                                        <IconButton aria-label="share">
+                                            <ShoppingCartCheckoutIcon />
+                                        </IconButton>
+                                    </Box>
+                                    <IconButton aria-label="modal">
+                                        <AspectRatioIcon />
                                     </IconButton>
-                                    <IconButton aria-label="share">
-                                        <ShoppingCartCheckoutIcon onClick={() => handleAddToCart(product)} />
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))
+                ) : (
+                    // Render actual product cards when data is loaded
+                    collection.map((product, index) => (
+                        <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
+                            <Card >
+                                <CardMedia
+                                    component="img"
+                                    height="194"
+                                    image={product.images[0]}
+                                    alt="Paella dish"
+                                />
+                                <CardContent>
+                                    <h1>{product.product_name}</h1>
+                                    <Typography variant="body2" color="text.secondary">
+                                        <div dangerouslySetInnerHTML={{ __html: product.description }} ></div>
+                                    </Typography>
+                                </CardContent>
+                                <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
+                                    <Box>
+                                        <IconButton aria-label="add to favorites">
+                                            <FavoriteIcon onClick={() => handleWishList(product)} />
+                                        </IconButton>
+                                        <IconButton aria-label="share">
+                                            <ShoppingCartCheckoutIcon onClick={() => handleAddToCart(product)} />
+                                        </IconButton>
+                                    </Box>
+                                    <IconButton aria-label="modal">
+                                        <AspectRatioIcon onClick={() => handleOpenModal(product)} />
                                     </IconButton>
-                                </Box>
-                                <IconButton aria-label="modal">
-                                    <AspectRatioIcon onClick={() => handleOpenModal(product)} />
-                                </IconButton>
-                            </CardActions>
-                        </Card>
-                    </Grid>
-                ))}
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))
+                )}
             </Grid>
             <Modals selectedProduct={selectedProduct} handleCloseModal={handleCloseModal}></Modals>
         </div>

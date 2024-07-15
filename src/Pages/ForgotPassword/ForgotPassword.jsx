@@ -40,9 +40,6 @@ const ForgetPassword = () => {
 
     return (
         <div className="lg:hero min-h-screen lg:bg-base-200 pt-20">
-            <Helmet>
-                <title>{`Reset password - ExeService.Online`}</title>
-            </Helmet>
             <div className="lg:hero-content flex-col lg:w-8/12">
                 <div className="card flex-shrink-0 w-full lg:max-w-sm lg:shadow-2xl bg-base-100 rounded-none">
                     <div className="card-body">

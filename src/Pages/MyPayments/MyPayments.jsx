@@ -9,7 +9,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_Payments_PK);
 
 const MyPayments = () => {
     const [carts] = useCart();
-    const total = carts.reduce((sum, item) => (item.price * (item.quantity)) + sum, 0);
+    const total = carts?.reduce((sum, item) => (item.price * (item.quantity)) + sum, 0);
     const productPrice = parseFloat(total.toFixed(2));
     const price = productPrice + 25
     const { user } = useAuth();

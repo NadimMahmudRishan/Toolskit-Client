@@ -29,7 +29,7 @@ const ManageUser = () => {
     };
 
     const handleMakeAdmin = (user) => {
-        fetch(`http://localhost:5000/users/admin/${user._id}`, {
+        fetch(`https://toold-kit-server.vercel.app/users/admin/${user._id}`, {
             method: 'PATCH'
         })
             .then(res => res.json())
@@ -49,7 +49,7 @@ const ManageUser = () => {
     };
 
     const handleMakeUser = (user) => {
-        fetch(`http://localhost:5000/users/make-user/${user._id}`, {
+        fetch(`https://toold-kit-server.vercel.app/users/make-user/${user._id}`, {
             method: 'PATCH'
         })
             .then(res => res.json())

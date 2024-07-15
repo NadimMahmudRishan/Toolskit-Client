@@ -52,9 +52,6 @@ const Login = () => {
     }
     return (
         <div className="lg:hero min-h-screen lg:min-h-[90vh] lg:bg-base-100">
-            <Helmet>
-                <title>{`Login - ExeService.Online`}</title>
-            </Helmet>
             <div className="lg:hero-content flex-col lg:w-8/12">
                 <div className="card flex-shrink-0 w-full lg:max-w-sm lg:shadow-2xl bg-base-100 rounded-sm">
                     <div className="card-body">

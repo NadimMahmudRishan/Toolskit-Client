@@ -93,9 +93,6 @@ const SignUp = () => {
 
     return (
         <div>
-            <Helmet>
-                <title>{`Register - ExeService.Online`}</title>
-            </Helmet>
             <div className="lg:hero  min-h-screen lg:bg-base-100 pb-20">
                 <div className="lg:hero-content">
                     <div className="card lg:w-[500px] flex-shrink-0 max-w-xl lg:shadow-2xl rounded-sm bg-base-100">
