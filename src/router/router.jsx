@@ -13,7 +13,6 @@ import PrivateRoute from "./PrivateRoute";
 import ManageUser from "../Pages/Dashboard/ManageUser/ManageUser";
 import AddProduct from "../Pages/Dashboard/AddProduct/AddProduct";
 import ManageProduct from "../Pages/Dashboard/ManageProduct/ManageProduct";
-import RecipeReviewCard from "../Pages/Dashboard/Shop/Shop";
 import WishList from "../Pages/WishList/WishList";
 import ShoppingCart from "../Pages/ShoppingCart/ShoppingCart";
 import MyPayments from "../Pages/MyPayments/MyPayments";
@@ -22,6 +21,7 @@ import AdminRoute from "./AdminRoute";
 import Details from "../Pages/Deatils/Details";
 import Blog from "../Pages/Blog/Blog";
 import Contact from "../Pages/Conatct/Conatct";
+import RecipeReviewCard from "../Pages/Shop/Shop";
 
 
 const router = createBrowserRouter([

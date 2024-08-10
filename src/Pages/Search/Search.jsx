@@ -1,148 +1,69 @@
-import { useLocation } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import useAuth from '../../hooks/useAuth';
 import { useState } from 'react';
-import useCart from '../../hooks/useCart';
-import useWishList from '../../hooks/useWishList';
-import SectionTitle from '../../components/SectionTitle/SectionTitle';
-import { Box, Card, CardActions, CardContent, CardMedia, Grid, IconButton, Typography } from '@mui/material';
-import Modals from '../../components/Modals/Modals';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import AspectRatioIcon from '@mui/icons-material/AspectRatio';
-import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
-import Skeleton from '@mui/material/Skeleton';
-import FeaturedProducts from '../Home/FeaturedProducts/FeaturedProducts';
+import { Box, CircularProgress, IconButton, TextField, Typography } from '@mui/material';
+import { IoSearch } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
 
-const Search = () => {
-    const location = useLocation();
-    const searchResults = JSON.parse(decodeURIComponent(new URLSearchParams(location.search).get('results')));
+const SmallNav = () => {
+    const [isLoading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const { user } = useAuth();
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [, refetch] = useCart();
-    const [, updateWishList] = useWishList();
-
-    const handleOpenModal = (product) => {
-        setSelectedProduct(product);
-    };
-
-    const handleCloseModal = () => {
-        setSelectedProduct(null);
-    };
-
-    const handleWishList = (data) => {
-        const saveData = {
-            product_name: data.product_name,
-            price: data.price,
-            images: data.images
-        }
-        fetch('https://toold-kit-server.vercel.app/wish-List', {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(saveData)
-        })
-            .then(res => res.json())
-            .then(data => {
+    const handleSearch = (event) => {
+        event.preventDefault();
+        const searchValue = event.target.search.value;
+        setLoading(true);
+        fetch(`https://toold-kit-server.vercel.app/product?product_name=${searchValue}`)
+            .then((res) => res.json())
+            .then((data) => {
                 console.log(data);
-                updateWishList();
-                Swal.fire('Added To WishList');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('An error occurred. Please try again later.');
+                setLoading(false);
+                navigate(`/search?results=${encodeURIComponent(JSON.stringify(data))}`);
             });
     };
 
-    const handleAddToCart = (data) => {
-        const saveData = {
-            product_name: data.product_name,
-            price: data.price,
-            images: data.images,
-            email: user?.email,
-            userName: user?.displayName,
-            quantity: 1
-        }
-        fetch('https://toold-kit-server.vercel.app/carts', {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(saveData)
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.insertedId) {
-                    refetch();
-                    Swal.fire({
-                        icon: 'success',
-                        title: `'${saveData.product_name}' added on the cart.`,
-                        showConfirmButton: false,
-                        timer: 1500
-                    })
-                }
-            })
-    }
-
     return (
-        <div>
-            <div className='min-h-screen mb-20'>
-                <SectionTitle heading="Search Result" subHeading='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in feugiat lorem.'></SectionTitle>
-                <Grid sx={{ maxWidth: 1300, mx: 'auto' }} container spacing={4}>
-                    {searchResults.map((product, index) => (
-                        <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
-                            <Card sx={{ maxWidth: 380 }}>
-                                {product ? (
-                                    <CardMedia
-                                        component="img"
-                                        height="194"
-                                        image={product.images[0]}
-                                        alt="Paella dish"
-                                    />
-                                ) : (
-                                    <Skeleton variant="rectangular" height={194} />
-                                )}
-                                <CardContent sx={{ maxWidth: 290 }}>
-                                    {product ? (
-                                        <>
-                                            <h1>{product.product_name}</h1>
-                                            <Typography variant="body2" color="text.secondary">
-                                                <div dangerouslySetInnerHTML={{ __html: product.description }} ></div>
-                                            </Typography>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Skeleton variant="text" />
-                                            <Skeleton variant="text" />
-                                            <Skeleton variant="text" />
-                                        </>
-                                    )}
-                                </CardContent>
-                                <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
-                                    <Box>
-                                        <IconButton aria-label="add to favorites">
-                                            <FavoriteIcon onClick={() => handleWishList(product)} />
-                                        </IconButton>
-                                        <IconButton aria-label="share">
-                                            <ShoppingCartCheckoutIcon onClick={() => handleAddToCart(product)} />
-                                        </IconButton>
-                                    </Box>
-                                    <IconButton aria-label="modal">
-                                        <AspectRatioIcon onClick={() => handleOpenModal(product)} />
-                                    </IconButton>
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-                <Modals selectedProduct={selectedProduct} handleCloseModal={handleCloseModal}></Modals>
-            </div>
-            <div className="mb-24 w-10/12 mx-auto">
-                <FeaturedProducts></FeaturedProducts>
-            </div>
-        </div>
+        <Box className="lg:flex hidden justify-between items-center px-28 py-4 bg-base-200">
+            <svg xmlns="http://www.w3.org/2000/svg" width="196px" height="26px">
+                <path d="M194.797,18 L184,18 C184,18.552 183.552,19 183,19 L182,19 C181.448,19 181,18.552 181,18 L181,16 L178.377,16 C177.708,16 177.119,15.556 176.935,14.912 L173.246,2 L168,2 L168,4 L168.500,4 C169.328,4 170,4.672 170,5.500 L170,24.500 C170,25.328 169.328,26 168.500,26 L165.500,26 C164.672,26 164,25.328 164,24.500 L164,5.500 C164,4.672 164.672,4 165.500,4 L166,4 L166,1.500 C166,0.672 166.672,0 167.500,0 L173.622,0 C174.292,0 174.881,0.444 175.065,1.088 L178.754,14 L181,14 L181,13 C181,12.448 181.448,12 182,12 L183,12 C183.552,12 184,12.448 184,13 L194.797,13 C195.461,13 196,13.539 196,14.203 L196,16.797 C196,17.461 195.461,18 194.797,18 ZM156.783,26 L154.483,26 C153.767,26 153.129,25.552 152.884,24.878 L150.437,18.135 C150.407,18.054 150.331,18 150.245,18 L142.768,18 C142.682,18 142.606,18.054 142.576,18.135 L140.129,24.878 C139.884,25.552 139.245,26 138.530,26 L136.230,26 C135.395,26 134.815,25.169 135.100,24.383 L143.445,1.122 C143.690,0.448 144.328,0 145.044,0 L147.969,0 C148.685,0 149.323,0.448 149.568,1.122 L157.913,24.383 C158.198,25.169 157.618,26 156.783,26 ZM148.472,12.725 L146.698,7.848 C146.633,7.668 146.380,7.668 146.315,7.848 L144.541,12.725 C144.492,12.859 144.591,13 144.733,13 L148.280,13 C148.422,13 148.521,12.859 148.472,12.725 ZM130.493,26 L128.090,26 C127.555,26 127.060,25.714 126.792,25.250 L122.610,18 L120.003,22.520 L120.003,24.500 C120.003,25.328 119.333,26 118.505,26 L116.507,26 C115.680,26 115.009,25.328 115.009,24.500 L115.009,1.500 C115.009,0.672 115.680,0 116.507,0 L118.505,0 C119.333,0 120.003,0.672 120.003,1.500 L120.003,12.520 L126.792,0.750 C127.060,0.286 127.555,0 128.090,0 L130.493,0 C131.646,0 132.367,1.250 131.791,2.250 L125.487,13 L131.791,23.750 C132.367,24.750 131.646,26 130.493,26 ZM103.987,15.775 L103.987,24.500 C103.987,25.328 103.315,26 102.486,26 L100.485,26 C99.656,26 98.984,25.328 98.984,24.500 L98.984,15.775 L98.594,15.100 L91.180,2.250 C90.610,1.250 91.330,0 92.481,0 L94.792,0 C95.322,0 95.823,0.290 96.093,0.750 L101.486,10.090 L106.879,0.750 C107.149,0.290 107.649,0 108.179,0 L110.491,0 C111.641,0 112.362,1.250 111.791,2.250 L103.987,15.775 ZM79,26 C71.821,26 66,20.179 66,13 C66,5.820 71.821,-0.001 79,-0.001 C86.180,-0.001 92.001,5.820 92.001,13 C92.001,20.179 86.180,26 79,26 ZM79,5 C74.582,5 71,8.582 71,13 C71,17.418 74.582,21 79,21 C83.418,21 87,17.418 87,13 C87,8.582 83.418,5 79,5 ZM62.793,23.750 C63.362,24.750 62.643,26 61.494,26 L59.186,26 C58.656,26 58.157,25.710 57.887,25.250 L53.711,18 L49.005,18 L49.005,24.500 C49.005,25.330 48.335,26 47.506,26 L45.508,26 C44.679,26 44.009,25.330 44.009,24.500 L44.009,1.500 C44.009,0.670 44.679,0 45.508,0 L54,0 C58.966,0 62.992,4.030 62.992,9 C62.992,12.240 61.274,15.090 58.706,16.670 L62.793,23.750 ZM54,5 L50.004,5 C49.454,5 49.005,5.450 49.005,6 L49.005,12 C49.005,12.550 49.454,13 50.004,13 L54,13 C56.208,13 57.997,11.210 57.997,9 C57.997,6.790 56.208,5 54,5 ZM39.500,5 L33,5 L33,24.500 C33,25.328 32.328,26 31.500,26 L29.500,26 C28.672,26 28,25.328 28,24.500 L28,5 L21.500,5 C20.672,5 20,4.328 20,3.500 L20,1.500 C20,0.672 20.672,0 21.500,0 L39.500,0 C40.328,0 41,0.672 41,1.500 L41,3.500 C41,4.328 40.328,5 39.500,5 ZM16.487,8 L14.181,8 C13.565,8 13.061,7.602 12.856,7.021 L11.787,4.000 L6.222,4.000 L5.153,7.021 C4.949,7.602 4.444,8 3.829,8 L1.512,8 C0.677,8 0.096,7.172 0.383,6.386 L5.128,0.215 C5.553,-0.295 6.390,-0.295 6.815,0.215 L11.561,6.386 C11.847,7.172 11.266,8 10.432,8 ZM7,19 C8.105,19 9,19.895 9,21 C9,22.105 8.105,23 7,23 C5.895,23 5,22.105 5,21 C5,19.895 5.895,19 7,19 ZM14,19 C15.105,19 16,19.895 16,21 C16,22.105 15.105,23 14,23 C12.895,23 12,22.105 12,21 C12,19.895 12.895,19 14,19 ZM7,26 C8.105,26 9,26.895 9,28 C9,29.105 8.105,30 7,30 C5.895,30 5,29.105 5,28 C5,26.895 5.895,26 7,26 ZM14,26 C15.105,26 16,26.895 16,28 C16,29.105 15.105,30 14,30 C12.895,30 12,29.105 12,28 C12,26.895 12.895,26 14,26 Z"></path>
+            </svg>
+            <Typography variant="h6" sx={{ ml: 2, fontWeight: 'bold', color: '#333' }}>
+                Categories
+            </Typography>
+            <Typography variant="h6" sx={{ ml: 2, fontWeight: 'bold', color: '#333' }}>
+                Brands
+            </Typography>
+            <Typography variant="h6" sx={{ ml: 2, fontWeight: 'bold', color: '#333' }}>
+                Tool Deals
+            </Typography>
+            <Box component="form" onSubmit={handleSearch} sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+                <TextField
+                    id="search"
+                    name="search"
+                    variant="outlined"
+                    size="small"
+                    placeholder="Search"
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                                borderColor: '#333',
+                            },
+                            '&:hover fieldset': {
+                                borderColor: '#666',
+                            },
+                            '&.Mui-focused fieldset': {
+                                borderColor: '#000',
+                            },
+                        },
+                        '& .MuiInputBase-input': {
+                            padding: '8px 10px',
+                        }
+                    }}
+                />
+                <IconButton type="submit" sx={{ p: '10px', color: '#333' }} aria-label="search">
+                    {isLoading ? <CircularProgress size={24} /> : <IoSearch />}
+                </IconButton>
+            </Box>
+        </Box>
     );
 };
 
-export default Search;
+export default SmallNav;

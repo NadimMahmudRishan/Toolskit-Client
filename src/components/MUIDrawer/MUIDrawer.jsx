@@ -293,7 +293,9 @@ function MiniDrawer() {
             </Hidden>
             <Box component="main" sx={{ flexGrow: 1, backgroundColor: '#F1F5F9' }}>
                 <DrawerHeader />
-                <Outlet />
+                <Box sx={{ minHeight: '100vh' }}>
+                    <Outlet />
+                </Box>
             </Box>
         </Box >
     );

@@ -1,3 +1,4 @@
+import { Container } from "@mui/material";
 import AdSection from "../AdSection/AdSection";
 import Banner from "../Banner/Banner";
 import Brands from "../Brands/Brands";
@@ -11,14 +12,14 @@ const Home = () => {
     return (
         <div>
             <Banner></Banner>
-            <div className="max-w-screen-xl lg:mx-auto mx-3">
+            <Container>
                 <Offer></Offer>
                 <FeaturedProducts></FeaturedProducts>
                 <AdSection></AdSection>
                 <Categorie></Categorie>
                 <LatestNews></LatestNews>
                 <Brands></Brands>
-            </div>
+            </Container>
         </div>
     );
 };

@@ -4,7 +4,7 @@ import MiniDrawer from "../../components/MUIDrawer/MUIDrawer";
 const Dashboard = () => {
     return (
         <div>
-           <MiniDrawer></MiniDrawer>
+            <MiniDrawer></MiniDrawer>
         </div>
     );
 };

@@ -25,20 +25,15 @@ const Footer = () => {
                 <div className='lg:flex gap-16'>
                     <ol className='col-span-0  space-y-2'>
                         <h6 className="text-xl font-bold">Company</h6>
-                        <li><Link className=" hover:text-[#CC3333]">About us</Link></li>
+                        <li><Link className=" hover:text-[#CC3333]">About</Link></li>
                         <li><Link className=" hover:text-[#CC3333]">Contact</Link></li>
-                        <li><Link className=" hover:text-[#CC3333]">Branding</Link></li>
-                        <li><Link className=" hover:text-[#CC3333]">Design</Link></li>
-                        <li><Link className=" hover:text-[#CC3333]">Jobs</Link></li>
-                        <li><Link className=" hover:text-[#CC3333]">Press kit</Link></li>
+                        <li><Link className=" hover:text-[#CC3333]">Blog</Link></li>
                     </ol>
                     <ol className='col-span-0  space-y-2 my-5 lg:my-0'>
                         <h6 className="text-xl font-bold">Legal</h6>
                         <li><Link className=" hover:text-[#CC3333]">Terms of use</Link></li>
                         <li><Link className=" hover:text-[#CC3333]">Privacy policy</Link></li>
                         <li><Link className=" hover:text-[#CC3333]">Cookie policy</Link></li>
-                        <li><Link className=" hover:text-[#CC3333]">Jobs</Link></li>
-                        <li><Link className=" hover:text-[#CC3333]">Marketing</Link></li>
                         <li><Link className=" hover:text-[#CC3333]">Advertisement</Link></li>
                     </ol>
                     <div className='col-span-0  space-y-2'>

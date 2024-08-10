@@ -1,4 +1,3 @@
-import React from 'react';
 import p1 from '../../assets/Slider/post-1.jpg';
 import p2 from '../../assets/Slider/post-2.jpg';
 import p3 from '../../assets/Slider/post-3.jpg';
@@ -9,6 +8,7 @@ import p8 from '../../assets/Slider/post-8.jpg';
 import p9 from '../../assets/Slider/post-9.jpg';
 import p10 from '../../assets/Slider/post-10.jpg';
 import SectionTitle from '../../components/SectionTitle/SectionTitle';
+import { Container } from '@mui/material';
 
 const posts = [
     {
@@ -95,18 +95,20 @@ const Blog = () => {
     return (
         <div>
             <SectionTitle heading='Blog' subHeading='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in feugiat lorem.'></SectionTitle>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 m-20">
-                {posts.map(post => (
-                    <div key={post.id} className="card bg-base-100 rounded-none">
-                        <figure><img src={post.image} alt="Post" /></figure>
-                        <div className="card-body">
-                            <h2 className="card-title text-center">{post.title}</h2>
-                            <span>{post.date}</span>
-                            <p>{post.content}</p>
+            <Container>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                    {posts.map(post => (
+                        <div key={post.id} className="card bg-base-100 rounded-none shadow-lg">
+                            <figure><img src={post.image} alt="Post" /></figure>
+                            <div className="p-2 border">
+                                <h2 className="card-title py-2">{post.title}</h2>
+                                <span>{post.date}</span>
+                                <p>{post.content}</p>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            </Container>
         </div>
     );
 };

@@ -132,7 +132,7 @@ export default function FeaturedProducts() {
                             max: 464,
                             min: 0
                         },
-                        items: 2,
+                        items: 1,
                         partialVisibilityGutter: 30
                     },
                     tablet: {
@@ -155,7 +155,7 @@ export default function FeaturedProducts() {
             >
                 {isLoading ? (
                     Array.from(new Array(8)).map((_, index) => (
-                        <Card key={index} sx={{ maxWidth: 345 }} className='border-[1px] border-gray-300'>
+                        <Card key={index} sx={{ maxWidth: 340 }} className='border-[1px] border-gray-300'>
                             <CardActionArea>
                                 <Skeleton variant="rectangular" />
                                 <CardContent>
@@ -180,24 +180,22 @@ export default function FeaturedProducts() {
                         </Card>
                     ))
                 ) : (
-                    collection.map((product, index) => (
-                        <Card key={index}  className='border-[1px] border-gray-300 w-40 h-full lg:w-72'>
-                            <CardActionArea>
-                                <CardContent>
-                                    <CardMedia
-                                        className=''
-                                        component="img"
-                                        image={product.images[0]}
-                                        alt="Paella dish"
-                                    />
-                                    <Typography className='text-sm'>
+                    collection.map((product) => (
+                        <Card key={product.id} sx={{ mx: '14px', boxShadow: 2, border: 1, borderColor: 'gray' }}>
+                            <CardContent sx={{ padding: 0 }}>
+                                <CardMedia
+                                    component="img"
+                                    image={product.images[0]}
+                                    alt="Product image"
+                                    sx={{ width: 200, height: 200, mx: 'auto' }}
+                                />
+                                <Box sx={{ p: 1 }}>
+                                    <Typography variant='h6' sx={{ my: 1 }}>
                                         {product.product_name}
                                     </Typography>
-                                    <Typography className='hidden lg:flex' variant="body2" color="text.secondary">
-                                        <div className='my-4' dangerouslySetInnerHTML={{ __html: product.description }}></div>
-                                    </Typography>
-                                </CardContent>
-                            </CardActionArea>
+                                    <p className='text-sm text-gray-500' dangerouslySetInnerHTML={{ __html: product.description }}></p>
+                                </Box>
+                            </CardContent>
                             <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
                                 <Box>
                                     <IconButton aria-label="add to favorites" onClick={() => handleWishList(product)}>

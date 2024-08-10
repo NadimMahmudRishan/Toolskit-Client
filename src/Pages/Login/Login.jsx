@@ -3,16 +3,16 @@ import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
-import { Helmet } from "react-helmet";
-import { TextField, Button, Typography, InputAdornment, IconButton, FormControl, InputLabel, OutlinedInput } from '@mui/material';
+import { TextField, Button, Typography, InputAdornment, IconButton, FormControl, InputLabel, OutlinedInput, Snackbar, Alert, Box } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import SocialLogIn from "./SocialLogin";
 
-
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const { signIn } = useAuth()
+    const { signIn } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -21,7 +21,6 @@ const Login = () => {
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
-    const [error, setError] = useState('');
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -29,7 +28,8 @@ const Login = () => {
 
     const onSubmit = data => {
         if (data.password.length < 6) {
-            setError('Password is less than 6 characters');
+            setSnackbarMessage('Password is less than 6 characters');
+            setOpenSnackbar(true);
             return;
         }
         signIn(data.email, data.password)
@@ -40,97 +40,132 @@ const Login = () => {
                 Swal.fire({
                     position: "center",
                     icon: "success",
-                    title: "User successfully Sing in.",
+                    title: "User successfully signed in.",
                     showConfirmButton: false,
                     timer: 1500,
                 });
             })
             .catch(error => {
-                setError(error.message);
+                setSnackbarMessage(error.message);
+                setOpenSnackbar(true);
                 console.error(error.message);
-            })
-    }
+            });
+    };
+
+    const handleCloseSnackbar = () => {
+        setOpenSnackbar(false);
+    };
+
     return (
-        <div className="lg:hero min-h-screen lg:min-h-[90vh] lg:bg-base-100">
-            <div className="lg:hero-content flex-col lg:w-8/12">
-                <div className="card flex-shrink-0 w-full lg:max-w-sm lg:shadow-2xl bg-base-100 rounded-sm">
-                    <div className="card-body">
-                        <div className="">
-                            <h1 className="text-3xl lg:font-bold">Login now</h1>
-                        </div>
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <div className="pt-3">
-                                <TextField
-                                    fullWidth
-                                    label="Email"
-                                    variant="outlined"
-                                    type="email"
-                                    {...register("email", { required: true })}
-                                    error={!!errors.email}
-                                    helperText={errors.email && "This field is required"}
-                                />
-                            </div>
-                            <div className="my-4">
-                                <FormControl fullWidth variant="outlined">
-                                    <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-                                    <OutlinedInput
-                                        id="outlined-adornment-password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        {...register("password", { required: true, minLength: 6, maxLength: 20 })}
-                                        endAdornment={
-                                            <InputAdornment position="end">
-                                                <IconButton
-                                                    aria-label="toggle password visibility"
-                                                    onClick={handleClickShowPassword}
-                                                    onMouseDown={handleMouseDownPassword}
-                                                    edge="end"
-                                                >
-                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        }
-                                        label="Password"
-                                    />
-                                    {errors.password && (
-                                        <Typography variant="body2" color="error">
-                                            {errors.password.type === "required" && "Password is required"}
-                                            {errors.password.type === "minLength" && "Password must have at least 6 characters"}
-                                            {errors.password.type === "maxLength" && "Password must have at most 20 characters"}
-                                        </Typography>
-                                    )}
-                                </FormControl>
-                                <Typography sx={{ marginTop: 2 }} variant="body2" color="primary">
-                                    <Link to='/request-password' className="label-text font-semibold-alt link link-hover">Forgot password?</Link>
+        <Box
+            sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '100vh',
+                bgcolor: 'background.paper'
+            }}
+        >
+            <Box
+                sx={{
+                    width: '100%',
+                    maxWidth: 400,
+                    p: 3,
+                    boxShadow: 3,
+                    bgcolor: 'background.default',
+                    borderRadius: 1
+                }}
+            >
+                <Typography variant="h4" component="h1" gutterBottom align="center">
+                    Login now
+                </Typography>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <Box sx={{ mb: 2 }}>
+                        <TextField
+                            fullWidth
+                            label="Email"
+                            variant="outlined"
+                            type="email"
+                            {...register("email", { required: "Email is required" })}
+                            error={!!errors.email}
+                            helperText={errors.email?.message}
+                        />
+                    </Box>
+                    <Box sx={{ mb: 4 }}>
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                            <OutlinedInput
+                                id="outlined-adornment-password"
+                                type={showPassword ? 'text' : 'password'}
+                                {...register("password", {
+                                    required: "Password is required",
+                                    minLength: {
+                                        value: 6,
+                                        message: "Password must have at least 6 characters"
+                                    },
+                                    maxLength: {
+                                        value: 20,
+                                        message: "Password must have at most 20 characters"
+                                    }
+                                })}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                }
+                                label="Password"
+                            />
+                            {errors.password && (
+                                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                                    {errors.password.message}
                                 </Typography>
-                            </div>
-                            <div>
-                                <Button
-                                    fullWidth
-                                    variant="contained"
-                                    color="primary"
-                                    type="submit"
-                                    sx={{
-                                        bgcolor: "#CC3333",
-                                        '&:hover': {
-                                            bgcolor: "#CC3333"
-                                        }
-                                    }}
-                                >
-                                    Login
-                                </Button>
-                            </div>
-                        </form>
-                        <div>
-                            <SocialLogIn></SocialLogIn>
-                        </div>
-                        <div className="mt-3">
-                            <p>New to Stroyka ? <Link className="text-[#CC3333] font-semibold" to="/signUp">Sign in</Link></p>
-                            <p className="text-red-600 py-3">{error}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                            )}
+                        </FormControl>
+                        <Typography sx={{ marginTop: 2 }} variant="body2" color="primary">
+                            <Link to='/request-password' style={{ color: '#1976d2' }}>Forgot password?</Link>
+                        </Typography>
+                    </Box>
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        type="submit"
+                        sx={{
+                            bgcolor: "#CC3333",
+                            '&:hover': {
+                                bgcolor: "#CC3333"
+                            }
+                        }}
+                    >
+                        Login
+                    </Button>
+                </form>
+                <Box sx={{ mt: 3 }}>
+                    <SocialLogIn />
+                </Box>
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                    <Typography variant="body2">
+                        New to Stroyka? <Link to="/signUp" style={{ color: '#CC3333', fontWeight: 'bold' }}>Sign up</Link>
+                    </Typography>
+                </Box>
+            </Box>
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+            >
+                <Alert onClose={handleCloseSnackbar} severity="error">
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
+        </Box>
     );
 };
 

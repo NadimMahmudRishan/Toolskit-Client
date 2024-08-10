@@ -15,7 +15,7 @@ const LatestNews = () => {
     return (
         <div>
             <div className='flex'>
-                <h1 className='text-xl font-bold pb-5 lg:pb-0'>Latest News</h1>
+                <h1 className='text-xl font-bold pb-5'>Latest News</h1>
             </div>
             <Carousel
                 additionalTransfrom={0}
@@ -67,118 +67,119 @@ const LatestNews = () => {
                 sliderClass=""
                 slidesToSlide={1}
                 swipeable
+                autoPlay={true}
             >
-                <div className="card lg:card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p1} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In
                         </p>
                     </div>
                 </div>
-                <div className="card lg:card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p2} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In
                         </p>
                     </div>
                 </div>
-                <div className="card lg:card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p3} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In
                         </p>
                     </div>
                 </div>
-                <div className="card lg:card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p4} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In
                         </p>
                     </div>
                 </div>
-                <div className="card lg:card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p5} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In
                         </p>
                     </div>
                 </div>
-                <div className="card lg:card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p7} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In
                         </p>
                     </div>
                 </div>
-                <div className="card lg:card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p8} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In
                         </p>
                     </div>
                 </div>
-                <div className="card lg:card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p9} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In
                         </p>
                     </div>
                 </div>
-                <div className="card card-side bg-base-100 rounded-none">
+                <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p10} alt="Movie" /></figure>
-                    <div className="card-body">
+                    <div className="px-3 pt-4 lg:pt-0">
                         <h2 className="card-title">A Digital Circuit Is Typically
                             Constructed From Small Electronic!</h2>
                         <span>February 10, 2019</span>
-                        <p>
+                        <p className='text-sm'>
                             In one general sense, philosophy is
                             associated with wisdom, intellectual
                             culture and a search for knowledge. In

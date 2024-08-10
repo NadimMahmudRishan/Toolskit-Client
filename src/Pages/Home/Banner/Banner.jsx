@@ -1,11 +1,12 @@
+import { Container } from "@mui/material";
 import Example from "./Example";
 
 
 const Banner = () => {
     return (
-        <div className="lg:min-h-screen">
+        <Container>
             <Example />
-        </div>
+        </Container>
     );
 };
 

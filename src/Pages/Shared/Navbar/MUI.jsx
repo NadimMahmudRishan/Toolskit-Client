@@ -158,7 +158,7 @@ function ResponsiveAppBar(props) {
                 {user && (
                     <>
                         <ListItem disablePadding>
-                            <ListItemButton
+                            {/* <ListItemButton
                                 sx={{
                                     color: location.pathname === '/myProfile' ? '#CC3333' : 'inherit',
                                     justifyContent: open ? 'initial' : 'center',
@@ -171,7 +171,7 @@ function ResponsiveAppBar(props) {
                                     <CgProfile className='w-5 h-5' />
                                 </ListItemIcon>
                                 <ListItemText primary="My Profile" color="black" />
-                            </ListItemButton>
+                            </ListItemButton> */}
                         </ListItem>
                         <ListItem disablePadding>
                             <ListItemButton onClick={handleLogOut}>
@@ -427,7 +427,7 @@ function ResponsiveAppBar(props) {
                         <Box sx={{ flexGrow: 0, display: { xs: 'flex', md: 'flex' } }}>
                             {user ? (
                                 <IconButton onClick={() => setOpenDrawer(true)} color="inherit">
-                                    <img alt="Avatar" className='w-10 rounded-full' src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+                                    <img alt="Avatar" className='w-10 rounded-full' src={user?.photoURL} />
                                 </IconButton>
                             ) : (
                                 <Link className='font-bold' to='/login'><PersonOutlineIcon color="inherit" style={{ fontSize: 30 }} /></Link>
@@ -457,10 +457,10 @@ function ResponsiveAppBar(props) {
                                         <ListItemIcon><RiHome3Line className='w-5 h-5' /></ListItemIcon>
                                         <ListItemText primary="Home" />
                                     </ListItem>
-                                    <ListItem button component={Link} to='/myProfile' onClick={closeDrawer}>
+                                    {/* <ListItem button component={Link} to='/myProfile' onClick={closeDrawer}>
                                         <ListItemIcon><CgProfile className='w-5 h-5' /></ListItemIcon>
                                         <ListItemText primary="My Profile" />
-                                    </ListItem>
+                                    </ListItem> */}
                                     <ListItem button onClick={handleLogOut} component={Link} to='/login'>
                                         <ListItemIcon><MdExitToApp className='w-5 h-5' /></ListItemIcon>
                                         <ListItemText primary="Logout" />

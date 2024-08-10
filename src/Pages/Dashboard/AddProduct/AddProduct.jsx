@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Helmet } from "react-helmet";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import LinearProgress from '@mui/material/LinearProgress';
-import { TextField, Button, Grid, Typography, Select, MenuItem } from '@mui/material'; // Import Select and MenuItem
+import { TextField, Button, Grid, Typography, Select, MenuItem, InputLabel, FormControl, Box, Paper } from '@mui/material';
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import Swal from "sweetalert2";
+import DashboardTitle from "../../../components/DashboardTitle/DashboardTitle";
 
 const AddProduct = () => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
@@ -16,7 +16,7 @@ const AddProduct = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [richTextValue, setRichTextValue] = useState('');
     const [specificationValue, setSpecificationValue] = useState('');
-    const [stockStatus, setStockStatus] = useState('In Stock'); // Default value
+    const [stockStatus, setStockStatus] = useState('In Stock');
 
     const modules = {
         toolbar: [
@@ -39,16 +39,6 @@ const AddProduct = () => {
 
     const uploadToImgbb = async (imageFiles) => {
         try {
-            const allowedImageCount = imageFiles.length;
-
-            if (allowedImageCount === null) {
-                throw new Error("Invalid image type selected.");
-            }
-
-            if (imageFiles.length !== allowedImageCount) {
-                throw new Error(`You must upload exactly ${allowedImageCount} image(s) for the selected type.`);
-            }
-
             const promises = imageFiles.map(async (file) => {
                 const formData = new FormData();
                 formData.append('image', file);
@@ -94,25 +84,27 @@ const AddProduct = () => {
             });
 
             Swal.fire({
-                title: 'Successfully Added',
-                text: 'Do you want to continue',
+                title: 'Product Added',
+                text: 'Product has been successfully added',
                 icon: 'success',
-                confirmButtonText: 'Cool'
-            })
+                confirmButtonText: 'OK'
+            });
             console.log('Product added successfully:', response.data);
             reset();
         } catch (error) {
             console.error('Error adding product:', error);
+            setApiError('An error occurred while adding the product.');
         }
     };
 
     return (
-        <div className="min-h-screen p-4 mt-16">
-            <div className="lg:w-3/4 mx-auto bg-white p-10">
+        <Box sx={{ p: 2 }}>
+            <DashboardTitle heading="ADD NEW PRODUCT" subHeading="Add New Product" route="Dashboard" />
+            <Paper sx={{ mt: 2, p: 3 }}>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={3}>
                         <Grid item xs={12}>
-                            <Typography variant="h6" gutterBottom>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                                 Product Details
                             </Typography>
                         </Grid>
@@ -120,51 +112,168 @@ const AddProduct = () => {
                             <TextField
                                 fullWidth
                                 label="Product Name"
-                                {...register("Product_Name", { required: true })}
-                                error={errors.Product_Name ? true : false}
-                                helperText={errors.Product_Name ? "This field is required" : ""}
+                                {...register("Product_Name", { required: "Product Name is required" })}
+                                error={Boolean(errors.Product_Name)}
+                                helperText={errors.Product_Name?.message}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'default',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'default',
+                                    },
+                                    '&:hover .MuiInputLabel-root': {
+                                        color: '#CC3333',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#CC3333',
+                                    },
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
                                 label="Price"
-                                {...register("Price", { required: true })}
-                                error={errors.Price ? true : false}
-                                helperText={errors.Price ? "This field is required" : ""}
+                                type="number"
+                                {...register("Price", { required: "Price is required" })}
+                                error={Boolean(errors.Price)}
+                                helperText={errors.Price?.message}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'default',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'default',
+                                    },
+                                    '&:hover .MuiInputLabel-root': {
+                                        color: '#CC3333',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#CC3333',
+                                    },
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
                                 label="Quantity"
-                                {...register("Quantity", { required: true })}
-                                error={errors.Quantity ? true : false}
-                                helperText={errors.Quantity ? "This field is required" : ""}
+                                type="number"
+                                {...register("Quantity", { required: "Quantity is required" })}
+                                error={Boolean(errors.Quantity)}
+                                helperText={errors.Quantity?.message}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'default',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'default',
+                                    },
+                                    '&:hover .MuiInputLabel-root': {
+                                        color: '#CC3333',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#CC3333',
+                                    },
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
                                 label="Category"
-                                {...register("category", { required: true })}
-                                error={errors.category ? true : false}
-                                helperText={errors.category ? "This field is required" : ""}
+                                {...register("category", { required: "Category is required" })}
+                                error={Boolean(errors.category)}
+                                helperText={errors.category?.message}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'default',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'default',
+                                    },
+                                    '&:hover .MuiInputLabel-root': {
+                                        color: '#CC3333',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#CC3333',
+                                    },
+                                }}
                             />
                         </Grid>
-                        <Grid item xs={12}>
-                            <Select us
-                                fullWidth
-                                value={stockStatus}
-                                onChange={(e) => setStockStatus(e.target.value)}
-                                label="Stock Status"
-                                variant="outlined"
+                        <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'default',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'default',
+                                    },
+                                    '&:hover .MuiInputLabel-root': {
+                                        color: '#CC3333',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#CC3333',
+                                    },
+                                }}
                             >
-                                <MenuItem value="In Stock">In Stock</MenuItem>
-                                <MenuItem value="Out of Stock">Out of Stock</MenuItem>
-                            </Select>
+                                <InputLabel>Stock Status</InputLabel>
+                                <Select
+                                    value={stockStatus}
+                                    onChange={(e) => setStockStatus(e.target.value)}
+                                    label="Stock Status"
+                                >
+                                    <MenuItem value="In Stock">In Stock</MenuItem>
+                                    <MenuItem value="Out of Stock">Out of Stock</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
                         <Grid item xs={12}>
+                            <Typography variant="h6" sx={{ mb: 1, fontWeight: ' bold' }}>
+                                Product Specification
+                            </Typography>
                             <ReactQuill
                                 theme="snow"
                                 value={specificationValue}
@@ -172,9 +281,13 @@ const AddProduct = () => {
                                 modules={modules}
                                 formats={formats}
                                 placeholder="Product Specification"
+                                style={{ height: '200px' }} // Adjust height as needed
                             />
                         </Grid>
                         <Grid item xs={12}>
+                            <Typography variant="h6" sx={{ mb: 1, mt: 4, fontWeight: 'bold' }}>
+                                Product Description
+                            </Typography>
                             <ReactQuill
                                 theme="snow"
                                 value={richTextValue}
@@ -182,49 +295,64 @@ const AddProduct = () => {
                                 modules={modules}
                                 formats={formats}
                                 placeholder="Product Description"
+                                style={{ height: '200px' }} // Adjust height as needed
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} sx={{ mt: 4 }}>
                             <input
-                                className="w-full"
                                 type="file"
                                 onChange={handleFileChange}
                                 multiple
-                                required
+                                accept="image/*"
+                                style={{ width: '100%', marginBottom: '16px' }}
                             />
-                            {errors.image && <span className="text-red-600">This field is required</span>}
                             {uploadProgress > 0 && (
-                                <div className="">
+                                <Box sx={{ mt: 2 }}>
                                     <LinearProgress
                                         variant="determinate"
                                         value={uploadProgress}
                                         color="warning"
                                     />
-                                    <span className="text-red-600 font-bold">{uploadProgress}%</span>
-                                </div>
+                                    <Typography variant="caption" color="textSecondary">
+                                        Upload Progress: {uploadProgress}%
+                                    </Typography>
+                                </Box>
                             )}
                         </Grid>
                         <Grid item xs={12}>
                             <Button
                                 type="submit"
                                 variant="contained"
+                                color="primary"
                                 sx={{
                                     bgcolor: "#CC3333",
                                     '&:hover': {
-                                        bgcolor: "#CC3333"
+                                        bgcolor: "#B02D2D"
                                     }
                                 }}
                                 disabled={isUploading}
                             >
-                                Submit
+                                {isUploading ? 'Submitting...' : 'Submit'}
                             </Button>
-                            <Button sx={{ mx: 2 }} type="reset" variant="contained" color="secondary" className="ms-2">Reset</Button>
+                            <Button
+                                type="reset"
+                                variant="outlined"
+                                color="secondary"
+                                sx={{ ml: 2 }}
+                                onClick={() => reset()}
+                            >
+                                Reset
+                            </Button>
                         </Grid>
-                        {apiError && <Grid item xs={12} className="text-error font-semibold">Error: {apiError}</Grid>}
+                        {apiError && <Grid item xs={12}>
+                            <Typography color="error" variant="body2">
+                                Error: {apiError}
+                            </Typography>
+                        </Grid>}
                     </Grid>
                 </form>
-            </div>
-        </div>
+            </Paper>
+        </Box>
     );
 };
 
