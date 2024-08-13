@@ -9,7 +9,7 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Badge, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, } from '@mui/material';
+import { Avatar, Badge, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, } from '@mui/material';
 import useAuth from '../../../hooks/useAuth';
 import { MdClose, MdContacts, MdDashboard, MdDomain, MdExitToApp } from 'react-icons/md';
 import { IoHome } from 'react-icons/io5';
@@ -19,7 +19,6 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import SearchIcon from '@mui/icons-material/Search';
 import { RiHome3Line } from 'react-icons/ri';
-import { CgProfile } from 'react-icons/cg';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import useWishList from '../../../hooks/useWishList';
 import useCart from '../../../hooks/useCart';
@@ -228,8 +227,8 @@ function ResponsiveAppBar(props) {
 
     return (
         <AppBar position="static" sx={{ backgroundColor: '#CC3333', color: 'white' }}>
-            <Container maxWidth="xl" sx={{ paddingRight: '0px' }}>
-                <Toolbar>
+            <Container>
+                <Toolbar disableGutters>
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
                             size="large"
@@ -372,7 +371,7 @@ function ResponsiveAppBar(props) {
                                                     </div>
                                                     <div className="cart-item-info">
                                                         <p className="font-bold text-[17px]">{data.product_name}</p>
-                                                        <p className="text-sm">Color: Yellow</p>
+                                                        <p className="text-sm">Color: {data.color}</p>
                                                         <p className="text-sm">Material: Aluminium</p>
                                                         <p className="text-sm">{data.quantity || 1} × ${data.price}</p>
                                                     </div>
@@ -427,10 +426,12 @@ function ResponsiveAppBar(props) {
                         <Box sx={{ flexGrow: 0, display: { xs: 'flex', md: 'flex' } }}>
                             {user ? (
                                 <IconButton onClick={() => setOpenDrawer(true)} color="inherit">
-                                    <img alt="Avatar" className='w-10 rounded-full' src={user?.photoURL} />
+                                    <Avatar alt="User Avatar" src={user?.photoURL} sx={{ width: 40, height: 40 }} />
                                 </IconButton>
                             ) : (
-                                <Link className='font-bold' to='/login'><PersonOutlineIcon color="inherit" style={{ fontSize: 30 }} /></Link>
+                                <Link className='font-bold' to='/login'>
+                                    <PersonOutlineIcon color="inherit" style={{ fontSize: 30 }} />
+                                </Link>
                             )}
                         </Box>
                         <Drawer sx={{ display: { xs: 'none', md: 'flex' } }} anchor="right" open={openDrawer} onClose={closeDrawer}>

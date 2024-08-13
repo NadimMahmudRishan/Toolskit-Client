@@ -23,7 +23,9 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle
+    DialogTitle,
+    TextField,
+    CircularProgress
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
@@ -34,6 +36,7 @@ import { visuallyHidden } from '@mui/utils';
 import DashboardTitle from '../../../components/DashboardTitle/DashboardTitle';
 
 const headCells = [
+    { id: 'product_image', numeric: false, disablePadding: true, label: 'Image' },
     { id: 'product_name', numeric: false, disablePadding: true, label: 'Product Name' },
     { id: 'price', numeric: true, disablePadding: false, label: 'Price' },
 ];
@@ -120,7 +123,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-    const { numSelected } = props;
+    const { numSelected, onSearchChange } = props;
 
     return (
         <Toolbar
@@ -155,16 +158,25 @@ function EnhancedTableToolbar(props) {
 
             {numSelected > 0 ? (
                 <Tooltip title="Delete">
-                    <IconButton>
+                    <IconButton onClick={props.onDeleteAll}>
                         <DeleteIcon color='error' />
                     </IconButton>
                 </Tooltip>
             ) : (
-                <Tooltip title="Filter list">
-                    <IconButton>
-                        <FilterListIcon />
-                    </IconButton>
-                </Tooltip>
+                <>
+                    <TextField
+                        label="Search Products"
+                        variant="outlined"
+                        size="small"
+                        onChange={onSearchChange}
+                        sx={{ mr: 2 }}
+                    />
+                    <Tooltip title="Filter list">
+                        <IconButton>
+                            <FilterListIcon />
+                        </IconButton>
+                    </Tooltip>
+                </>
             )}
         </Toolbar>
     );
@@ -172,6 +184,8 @@ function EnhancedTableToolbar(props) {
 
 EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
+    onSearchChange: PropTypes.func.isRequired,
+    onDeleteAll: PropTypes.func.isRequired,
 };
 
 const ManageProduct = () => {
@@ -192,11 +206,11 @@ const ManageProduct = () => {
     const [orderBy, setOrderBy] = useState('product_name');
     const [selected, setSelected] = useState([]);
     const [page, setPage] = useState(0);
-    const [dense, setDense] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -213,25 +227,6 @@ const ManageProduct = () => {
         setSelected([]);
     };
 
-    const handleClick = (event, id) => {
-        const selectedIndex = selected.indexOf(id);
-        let newSelected = [];
-
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1)
-            );
-        }
-        setSelected(newSelected);
-    };
-
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -240,12 +235,6 @@ const ManageProduct = () => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-
-    const handleChangeDense = (event) => {
-        setDense(event.target.checked);
-    };
-
-    const isSelected = (id) => selected.indexOf(id) !== -1;
 
     const handleDelete = async (id) => {
         Swal.fire({
@@ -259,15 +248,10 @@ const ManageProduct = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`https://toold-kit-server.vercel.app/delete-product/${id}`, {
-                        method: 'DELETE'
-                    });
-                    const data = await response.json();
-                    if (data.deletedCount > 0) {
-                        setSnackbarMessage('Item deleted successfully.');
-                        setSnackbarOpen(true);
-                        refetch();
-                    }
+                    await axiosSecure.delete(`/delete-product/${id}`);
+                    setSnackbarMessage('Item deleted successfully.');
+                    setSnackbarOpen(true);
+                    refetch();
                 } catch (error) {
                     console.error('Error deleting product:', error);
                 }
@@ -275,68 +259,63 @@ const ManageProduct = () => {
         });
     };
 
-    const handleDeleteAllOpen = () => {
+    const handleDeleteAll = async () => {
         setOpenConfirmDialog(true);
     };
 
-    const handleDeleteAll = async () => {
-        if (selected.length > 0) {
-            setOpenConfirmDialog(false);
-            try {
-                const results = await Promise.all(
-                    selected.map((id) =>
-                        fetch(`https://toold-kit-server.vercel.app/delete-product/${id}`, {
-                            method: 'DELETE'
-                        })
-                    )
-                );
-                const success = results.every((result) => result.ok);
-                if (success) {
-                    setSnackbarMessage('Selected items deleted successfully.');
-                    setSnackbarOpen(true);
-                    setSelected([]);
-                    refetch();
-                }
-            } catch (error) {
-                console.error('Error deleting products:', error);
-            }
+    const handleConfirmDelete = async () => {
+        try {
+            await Promise.all(selected.map(id => axiosSecure.delete(`/delete-product/${id}`)));
+            setSnackbarMessage('Items deleted successfully.');
+            setSnackbarOpen(true);
+            setSelected([]);
+            refetch();
+        } catch (error) {
+            console.error('Error deleting products:', error);
         }
+        setOpenConfirmDialog(false);
     };
 
-    const handleSnackbarClose = () => {
-        setSnackbarOpen(false);
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
     };
+
+    const filteredCollection = collection.filter(product =>
+        product.product_name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const isSelected = (id) => selected.indexOf(id) !== -1;
 
     return (
         <Box sx={{ p: 2 }}>
             <DashboardTitle heading="MANAGE PRODUCT" subHeading="Manage Product" route="Dashboard" />
-            <Box sx={{ width: '100%' }}>
-                <Paper sx={{ width: '100%', mt: 2 }}>
-                    <EnhancedTableToolbar numSelected={selected.length} />
-                    <TableContainer
-                        sx={{
-                            width: {
-                                xs: '335px',
-                                sm: '350px',
-                                md: '100%',
-                            },
-                        }}
-                    >
-                        <Table
-                            sx={{ minWidth: 750 }}
-                            aria-labelledby="tableTitle"
-                            size={dense ? 'small' : 'medium'}
-                        >
+            <Paper sx={{ width: '100%', mt: 2 }}>
+                <EnhancedTableToolbar
+                    numSelected={selected.length}
+                    onSearchChange={handleSearchChange}
+                    onDeleteAll={handleDeleteAll}
+                />
+                {isLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', padding: 2 }}>
+                        <CircularProgress />
+                    </Box>
+                ) : isError ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', padding: 2 }}>
+                        <Typography variant="h6" color="error">Error loading data</Typography>
+                    </Box>
+                ) : (
+                    <TableContainer>
+                        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
                             <EnhancedTableHead
                                 numSelected={selected.length}
                                 order={order}
                                 orderBy={orderBy}
                                 onSelectAllClick={handleSelectAllClick}
                                 onRequestSort={handleRequestSort}
-                                rowCount={collection.length}
+                                rowCount={filteredCollection.length}
                             />
                             <TableBody>
-                                {stableSort(collection, getComparator(order, orderBy))
+                                {stableSort(filteredCollection, getComparator(order, orderBy))
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((row, index) => {
                                         const isItemSelected = isSelected(row._id);
@@ -345,7 +324,6 @@ const ManageProduct = () => {
                                         return (
                                             <TableRow
                                                 hover
-                                                onClick={(event) => handleClick(event, row._id)}
                                                 role="checkbox"
                                                 aria-checked={isItemSelected}
                                                 tabIndex={-1}
@@ -359,76 +337,67 @@ const ManageProduct = () => {
                                                         inputProps={{ 'aria-labelledby': labelId }}
                                                     />
                                                 </TableCell>
-                                                <TableCell
-                                                    component="th"
-                                                    id={labelId}
-                                                    scope="row"
-                                                    padding="none"
-                                                >
-                                                    {row.product_name}
+                                                <TableCell component="th" id={labelId} scope="row" padding="none">
+                                                    <img src={row.images[0]} alt={row.product_name} width="50" height="50" />
                                                 </TableCell>
-                                                <TableCell align="right">$ {row.price}</TableCell>
+                                                <TableCell align="left">{row.product_name}</TableCell>
+                                                <TableCell align="right">{row.price}</TableCell>
                                                 <TableCell align="right">
-                                                    <IconButton
-                                                        color="error"
-                                                        onClick={() => handleDelete(row._id)}
-                                                    >
+                                                    <IconButton onClick={() => handleDelete(row._id)} color="error">
                                                         <DeleteIcon />
                                                     </IconButton>
                                                 </TableCell>
                                             </TableRow>
                                         );
                                     })}
-                                {collection.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={6} align="center">
-                                            No products available.
-                                        </TableCell>
+                                {/* {emptyRows > 0 && (
+                                    <TableRow style={{ height: (53) * emptyRows }}>
+                                        <TableCell colSpan={6} />
                                     </TableRow>
-                                )}
+                                )} */}
                             </TableBody>
                         </Table>
                     </TableContainer>
-                    <TablePagination
-                        rowsPerPageOptions={[5, 10, 25]}
-                        component="div"
-                        count={collection.length}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
-                </Paper>
-                <Snackbar
-                    open={snackbarOpen}
-                    autoHideDuration={3000}
-                    onClose={handleSnackbarClose}
-                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                >
-                    <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
-                        {snackbarMessage}
-                    </Alert>
-                </Snackbar>
-                <Dialog
-                    open={openConfirmDialog}
-                    onClose={() => setOpenConfirmDialog(false)}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                >
-                    <DialogTitle id="alert-dialog-title">{"Delete selected items?"}</DialogTitle>
-                    <DialogContent>
-                        <Typography>Are you sure you want to delete the selected items?</Typography>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setOpenConfirmDialog(false)} color="primary">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleDeleteAll} color="primary" autoFocus>
-                            Confirm
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </Box>
+                )}
+                <TablePagination
+                    rowsPerPageOptions={[10, 25, 50]}
+                    component="div"
+                    count={filteredCollection.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </Paper>
+            <Dialog
+                open={openConfirmDialog}
+                onClose={() => setOpenConfirmDialog(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <Typography>Are you sure you want to delete the selected items?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenConfirmDialog(false)} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error">
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

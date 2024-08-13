@@ -1,16 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
+import useAxios from "./useAxios";
 
 const useWishList = () => {
-    const { refetch: updateWishList, data: wishList = [],isLoading } = useQuery({
+    const [axiosSecure] = useAxios();
+
+    const { data: wishList = [], refetch, isLoading } = useQuery({
         queryKey: ['wishList'],
         queryFn: async () => {
-            const res = await fetch(`https://toold-kit-server.vercel.app/wishList`, {
-            })
-            return res.json();
+            const res = await axiosSecure.get('/wishList');
+            return res.data;
         },
-    })
+    });
 
-    return [wishList, updateWishList, isLoading];
+    return [wishList, refetch, isLoading];
 }
 
 export default useWishList;

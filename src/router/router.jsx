@@ -69,7 +69,7 @@ const router = createBrowserRouter([
             {
                 path: 'details/:id',
                 element: <Details></Details>,
-                loader: ({ params }) => fetch(`https://toold-kit-server.vercel.app/collection/${params.id}`)
+                loader: ({ params }) => fetch(`http://localhost:5000/api/collection/${params.id}`)
             },
             {
                 path: 'blog',

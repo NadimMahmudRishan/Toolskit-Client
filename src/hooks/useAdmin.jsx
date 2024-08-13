@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import useAxios from "./useAxios";
-import useAuth from "./useAuth";
 import { useQuery } from "@tanstack/react-query";
+import useAuth from "./useAuth";
+import useAxios from "./useAxios";
 
 const useAdmin = () => {
     const { user, loading } = useAuth();
@@ -13,8 +13,8 @@ const useAdmin = () => {
         enabled: !loading && !!user?.email,
         queryFn: async () => {
             try {
-                const res = await axiosSecure.get(`/users/admin/${user?.email}`);
-                return res.data.admin;
+                const response = await axiosSecure.get(`/verify/admin-users/${user?.email}`);
+                return response.data.Admin;
             } catch (error) {
                 console.error('Error while fetching isAdmin:', error);
                 return false;

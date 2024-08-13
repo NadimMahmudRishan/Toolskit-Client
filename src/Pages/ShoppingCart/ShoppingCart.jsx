@@ -1,11 +1,13 @@
-import { useState, } from 'react';
+import { useState, useEffect } from 'react';
 import useCart from "../../hooks/useCart";
-import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, IconButton, Skeleton } from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, IconButton, Skeleton, Container } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Swal from "sweetalert2";
 import { Link } from 'react-router-dom';
+import useAxios from '../../hooks/useAxios';
 
 const ShoppingCart = () => {
+    const [axiosSecure] = useAxios();
     const [carts, refetch, isLoading] = useCart();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -14,6 +16,9 @@ const ShoppingCart = () => {
     const Shipping = 25;
     const [total, setTotal] = useState(subtotal + Shipping);
 
+    useEffect(() => {
+        calculateSubtotal();
+    }, [carts, quantities]);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -33,25 +38,20 @@ const ShoppingCart = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                fetch(`https://toold-kit-server.vercel.app/carts/${id}`, {
-                    method: 'DELETE'
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.deletedCount > 0) {
-                            refetch();
-                            Swal.fire(
-                                'Deleted!',
-                                'Your file has been deleted.',
-                                'success'
-                            )
-                        }
-                    })
+                try {
+                    const { data } = await axiosSecure.delete(`/delete-carts/${id}`);
+                    if (data.deletedCount > 0) {
+                        refetch();
+                        Swal.fire('Deleted!', 'Your item has been deleted.', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error deleting cart item:', error);
+                }
             }
-        })
-    }
+        });
+    };
 
     const handleQuantityChange = (id, event) => {
         const newQuantity = parseInt(event.target.value);
@@ -60,24 +60,14 @@ const ShoppingCart = () => {
             [id]: newQuantity
         }));
         updateCart(id, newQuantity);
-        calculateSubtotal();
     };
 
-    const updateCart = (id, quantity) => {
-        fetch(`https://toold-kit-server.vercel.app/carts/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ quantity })
-        })
-            .then(res => res.json())
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error updating cart:', error);
-            });
+    const updateCart = async (id, quantity) => {
+        try {
+            await axiosSecure.put(`/update-carts/${id}`, { quantity });
+        } catch (error) {
+            console.error('Error updating cart:', error);
+        }
     };
 
     const handleIncrement = (id, quantity) => {
@@ -109,13 +99,14 @@ const ShoppingCart = () => {
     };
 
     return (
-        <div className="mx-40 my-10">
+        <Container sx={{ p: 5 }}>
             <h1 className="text-4xl font-bold pb-5">Shopping Cart</h1>
             <Table>
                 <TableHead sx={{ backgroundColor: 'white' }}>
                     <TableRow className='bg-base-200'>
                         <TableCell>Images</TableCell>
                         <TableCell>Name</TableCell>
+                        <TableCell>Color</TableCell>
                         <TableCell>Quantity</TableCell>
                         <TableCell>Price</TableCell>
                         <TableCell>Action</TableCell>
@@ -123,7 +114,6 @@ const ShoppingCart = () => {
                 </TableHead>
                 <TableBody sx={{ backgroundColor: 'white' }}>
                     {isLoading ? (
-                        // Skeleton Loading while data is loading
                         Array.from(new Array(rowsPerPage)).map((_, index) => (
                             <TableRow key={index}>
                                 <TableCell>
@@ -144,7 +134,6 @@ const ShoppingCart = () => {
                             </TableRow>
                         ))
                     ) : (
-                        // Render actual cart items when data is loaded
                         carts && carts.length > 0 ?
                             carts
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -154,11 +143,11 @@ const ShoppingCart = () => {
                                             <img src={cartItem.images[0]} alt={cartItem.product_name} style={{ width: "50px", height: "50px" }} />
                                         </TableCell>
                                         <TableCell>{cartItem.product_name}</TableCell>
+                                        <TableCell>{cartItem.color}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center">
                                                 <button className="px-2 py-1 border border-gray-300 rounded-l" onClick={() => handleDecrement(cartItem._id, cartItem.quantity)}>-</button>
                                                 <input
-                                                    defaultValue={cartItem.quantity}
                                                     type="number"
                                                     className="w-16 px-2 py-1 text-center border-t border-b border-gray-300"
                                                     value={quantities[cartItem._id] || cartItem.quantity || 1}
@@ -182,7 +171,6 @@ const ShoppingCart = () => {
                             )
                     )}
                 </TableBody>
-
             </Table>
             <TablePagination
                 sx={{ backgroundColor: 'white' }}
@@ -223,7 +211,7 @@ const ShoppingCart = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </Container>
     );
 };
 

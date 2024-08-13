@@ -21,12 +21,13 @@ const LatestNews = () => {
                 additionalTransfrom={0}
                 arrows={false}
                 autoPlaySpeed={3000}
+                autoPlay={true} // Enable auto play
                 centerMode={false}
                 containerClass="container-padding-bottom"
                 dotListClass=""
                 draggable
                 focusOnSelect={false}
-                infinite={false}
+                infinite={true} // Enable infinite loop
                 keyBoardControl
                 minimumTouchDrag={80}
                 pauseOnHover
@@ -67,7 +68,6 @@ const LatestNews = () => {
                 sliderClass=""
                 slidesToSlide={1}
                 swipeable
-                autoPlay={true}
             >
                 <div className="card lg:card-side bg-base-100 rounded-none border p-3 mx-2">
                     <figure><img src={p1} alt="Movie" /></figure>

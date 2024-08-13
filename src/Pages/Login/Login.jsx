@@ -1,18 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import useAuth from "../../hooks/useAuth";
-import { TextField, Button, Typography, InputAdornment, IconButton, FormControl, InputLabel, OutlinedInput, Snackbar, Alert, Box } from '@mui/material';
+import { TextField, Button, Typography, InputAdornment, IconButton, FormControl, InputLabel, OutlinedInput, FormControlLabel, Checkbox, Grid, CircularProgress } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import SocialLogIn from "./SocialLogin";
+import Cookies from 'js-cookie';
+import CryptoJS from 'crypto-js';
+import { Helmet } from "react-helmet";
+import GetDeviceInfo from "../../components/GetDeviceInfo/GetDeviceInfo";
+import useAuth from "../../hooks/useAuth";
+import useAxios from "../../hooks/useAxios";
 
 const Login = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, formState: { errors }, setValue } = useForm();
     const { signIn } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const location = useLocation();
+    const navigate = useNavigate();
+    const from = location.state?.from?.pathname || "/";
+    const [axiosSecure, axiosError] = useAxios();
+
+    useEffect(() => {
+        const storedEmail = Cookies.get('genericUID');
+        const storedPassword = Cookies.get('genericUSER');
+        if (storedEmail) {
+            const decryptedEmail = CryptoJS.AES.decrypt(storedEmail, 'your_secret_key').toString(CryptoJS.enc.Utf8);
+            setValue('email', decryptedEmail);
+        }
+        if (storedPassword) {
+            const decryptedPassword = CryptoJS.AES.decrypt(storedPassword, 'your_secret_key').toString(CryptoJS.enc.Utf8);
+            setValue('password', decryptedPassword);
+        }
+    }, [setValue]);
+
+    useEffect(() => {
+        if (axiosError) {
+            console.log(axiosError.response?.data?.message)
+            setError(axiosError?.response?.data?.message || 'An unexpected error occurred');
+        }
+    }, [axiosError]);
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -22,150 +50,194 @@ const Login = () => {
         event.preventDefault();
     };
 
-    const location = useLocation();
-    const navigate = useNavigate();
-    const from = location.state?.from?.pathname || "/";
+    const onSubmit = async (data) => {
+        const deviceInfo = GetDeviceInfo();
 
-    const onSubmit = data => {
-        if (data.password.length < 6) {
-            setSnackbarMessage('Password is less than 6 characters');
-            setOpenSnackbar(true);
-            return;
-        }
-        signIn(data.email, data.password)
-            .then(result => {
-                const loggedUser = result.user;
-                console.log(loggedUser);
-                navigate(from, { replace: true });
-                Swal.fire({
-                    position: "center",
-                    icon: "success",
-                    title: "User successfully signed in.",
-                    showConfirmButton: false,
-                    timer: 1500,
-                });
-            })
-            .catch(error => {
-                setSnackbarMessage(error.message);
-                setOpenSnackbar(true);
-                console.error(error.message);
+        // Generate a unique device ID if not already present
+        const deviceId = Cookies.get('deviceId') || CryptoJS.lib.WordArray.random(16).toString();
+        deviceInfo.deviceId = deviceId;
+        Cookies.set('deviceId', deviceId, { expires: 365 });
+
+        console.log(deviceInfo);
+        setError('');
+        setLoading(true);
+        try {
+            if (data.password.length < 6) {
+                setError('Password must be at least 6 characters');
+                setLoading(false);
+                return;
+            }
+
+            const response = await axiosSecure.post('/login', {
+                email: data.email,
+                password: data.password,
+                deviceInfo: deviceInfo
             });
-    };
+            console.log(response);
+            const loggedUser = response.data;
 
-    const handleCloseSnackbar = () => {
-        setOpenSnackbar(false);
+            // Store the token in local storage
+            localStorage.setItem('access-token', loggedUser.token);
+
+            if (data.rememberMe) {
+                const encryptedEmail = CryptoJS.AES.encrypt(data.email, 'your_secret_key').toString();
+                const encryptedPassword = CryptoJS.AES.encrypt(data.password, 'your_secret_key').toString();
+                Cookies.set('genericUID', encryptedEmail, { expires: 7 });
+                Cookies.set('genericUSER', encryptedPassword, { expires: 7 });
+            } else {
+                Cookies.remove('genericUID');
+                Cookies.remove('genericUSER');
+            }
+            console.log(data.email, data.password)
+            await signIn(data.email, data.password);
+            navigate(from, { replace: true });
+            Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "User successfully signed in.",
+                showConfirmButton: false,
+                timer: 1500,
+            });
+        } catch (error) {
+            console.error('Login error:', error);
+            setError(error.response?.data?.message || 'An error occurred during login');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '100vh',
-                bgcolor: 'background.paper'
-            }}
-        >
-            <Box
-                sx={{
-                    width: '100%',
-                    maxWidth: 400,
-                    p: 3,
-                    boxShadow: 3,
-                    bgcolor: 'background.default',
-                    borderRadius: 1
-                }}
-            >
-                <Typography variant="h4" component="h1" gutterBottom align="center">
-                    Login now
-                </Typography>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <Box sx={{ mb: 2 }}>
-                        <TextField
-                            fullWidth
-                            label="Email"
-                            variant="outlined"
-                            type="email"
-                            {...register("email", { required: "Email is required" })}
-                            error={!!errors.email}
-                            helperText={errors.email?.message}
-                        />
-                    </Box>
-                    <Box sx={{ mb: 4 }}>
-                        <FormControl fullWidth variant="outlined">
-                            <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-                            <OutlinedInput
-                                id="outlined-adornment-password"
-                                type={showPassword ? 'text' : 'password'}
-                                {...register("password", {
-                                    required: "Password is required",
-                                    minLength: {
-                                        value: 6,
-                                        message: "Password must have at least 6 characters"
-                                    },
-                                    maxLength: {
-                                        value: 20,
-                                        message: "Password must have at most 20 characters"
-                                    }
-                                })}
-                                endAdornment={
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={handleClickShowPassword}
-                                            onMouseDown={handleMouseDownPassword}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                }
-                                label="Password"
-                            />
-                            {errors.password && (
-                                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                                    {errors.password.message}
-                                </Typography>
-                            )}
-                        </FormControl>
-                        <Typography sx={{ marginTop: 2 }} variant="body2" color="primary">
-                            <Link to='/request-password' style={{ color: '#1976d2' }}>Forgot password?</Link>
-                        </Typography>
-                    </Box>
-                    <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        sx={{
-                            bgcolor: "#CC3333",
-                            '&:hover': {
-                                bgcolor: "#CC3333"
-                            }
-                        }}
-                    >
-                        Login
-                    </Button>
-                </form>
-                <Box sx={{ mt: 3 }}>
-                    <SocialLogIn />
-                </Box>
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                    <Typography variant="body2">
-                        New to Stroyka? <Link to="/signUp" style={{ color: '#CC3333', fontWeight: 'bold' }}>Sign up</Link>
-                    </Typography>
-                </Box>
-            </Box>
-            <Snackbar
-                open={openSnackbar}
-                autoHideDuration={6000}
-                onClose={handleCloseSnackbar}
-            >
-                <Alert onClose={handleCloseSnackbar} severity="error">
-                    {snackbarMessage}
-                </Alert>
-            </Snackbar>
-        </Box>
+        <div className="lg:hero min-h-screen lg:bg-base-200">
+            <Helmet>
+                <title>{`Login - Bank Management`}</title>
+            </Helmet>
+            <div className="lg:hero-content flex-col lg:w-full">
+                <div className="card flex-shrink-0 w-full lg:max-w-md lg:shadow-2xl bg-base-100 rounded-sm">
+                    <div className="card-body">
+                        <h1 className="text-3xl">Login now</h1>
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <div className="pt-3">
+                                <TextField
+                                    fullWidth
+                                    label="Email"
+                                    variant="outlined"
+                                    type="email"
+                                    {...register("email", { required: true })}
+                                    error={!!errors.email}
+                                    helperText={errors.email && "This field is required"}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderColor: 'default',
+                                            },
+                                            '&:hover fieldset': {
+                                                borderColor: '#CC3333',
+                                            },
+                                            '&.Mui-focused fieldset': {
+                                                borderColor: '#CC3333',
+                                            },
+                                        },
+                                        '& .MuiInputLabel-root': {
+                                            color: 'default',
+                                        },
+                                        '&:hover .MuiInputLabel-root': {
+                                            color: '#CC3333',
+                                        },
+                                        '& .MuiInputLabel-root.Mui-focused': {
+                                            color: '#CC3333',
+                                        },
+                                    }}
+                                />
+                            </div>
+                            <div className="my-4">
+                                <FormControl fullWidth variant="outlined"
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderColor: 'default',
+                                            },
+                                            '&:hover fieldset': {
+                                                borderColor: '#CC3333',
+                                            },
+                                            '&.Mui-focused fieldset': {
+                                                borderColor: '#CC3333',
+                                            },
+                                        },
+                                        '& .MuiInputLabel-root': {
+                                            color: 'default',
+                                        },
+                                        '&:hover .MuiInputLabel-root': {
+                                            color: '#CC3333',
+                                        },
+                                        '& .MuiInputLabel-root.Mui-focused': {
+                                            color: '#CC3333',
+                                        },
+                                    }}
+                                >
+                                    <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                                    <OutlinedInput
+                                        id="outlined-adornment-password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        {...register("password", { required: true, minLength: 6, maxLength: 20 })}
+                                        endAdornment={
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={handleClickShowPassword}
+                                                    onMouseDown={handleMouseDownPassword}
+                                                    edge="end"
+                                                >
+                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        }
+                                        label="Password"
+                                    />
+                                    {errors.password && (
+                                        <Typography variant="body2" color="error">
+                                            {errors.password.type === "required" && "Password is required"}
+                                            {errors.password.type === "minLength" && "Password must have at least 6 characters"}
+                                            {errors.password.type === "maxLength" && "Password must have at most 20 characters"}
+                                        </Typography>
+                                    )}
+                                </FormControl>
+                                <Grid container sx={{ my: 2 }}>
+                                    <Grid item xs>
+                                        <Link to='/request-password' className="label-text font-semibold-alt link link-hover">Forgot password?</Link>
+                                    </Grid>
+                                    <Grid item>
+                                        <Link to='/signUp' className="label-text font-semibold-alt link link-hover">{"Don't have an account? Sign Up"}</Link>
+                                    </Grid>
+                                </Grid>
+                                <FormControlLabel
+                                    control={<Checkbox   {...register("rememberMe")} value="rememberMe" color="error" />}
+                                    label="Remember me"
+                                />
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    sx={{
+                                        bgcolor: "#CC3333",
+                                        '&:hover': {
+                                            bgcolor: "#CC3333"
+                                        },
+                                        mt: 3,
+                                        mb: 2
+                                    }}
+                                    disabled={loading}
+                                >
+                                    {loading ? <CircularProgress size={24} color="inherit" /> : "Sign In"}
+                                </Button>
+                            </div>
+                        </form>
+                        {error && <Typography sx={{ width: { xs: '100%', md: 380 }, mx: 'auto', bgcolor: '#dc3545', p: 2, color: 'white' }} variant="body2" color="error" align="center">
+                            {error}
+                        </Typography>}
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 

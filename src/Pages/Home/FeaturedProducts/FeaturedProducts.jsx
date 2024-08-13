@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { Box, Card, CardContent, CardActions, IconButton, Typography, CardMedia, Skeleton, CardActionArea } from '@mui/material';
+import { useState } from 'react';
+import { Box, Card, CardContent, CardActions, IconButton, Typography, CardMedia, Skeleton, CardActionArea, Paper } from '@mui/material';
 import { Favorite as FavoriteIcon, AspectRatio as AspectRatioIcon, ShoppingCartCheckout as ShoppingCartCheckoutIcon } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import useAxios from '../../../hooks/useAxios';
@@ -38,7 +38,7 @@ export default function FeaturedProducts() {
         setSelectedProduct(null);
     };
 
-    const handleWishList = useCallback((data) => {
+    const handleWishList = (data) => {
         const saveData = {
             product_name: data.product_name,
             price: data.price,
@@ -46,7 +46,7 @@ export default function FeaturedProducts() {
             email: user?.email,
             userName: user?.displayName,
         }
-        fetch('https://toold-kit-server.vercel.app/wish-list', {
+        fetch('http://localhost:5000/api/wish-list', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -55,45 +55,44 @@ export default function FeaturedProducts() {
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data);
                 updateWishList();
-                Swal.fire('Added To WishList');
+                Swal.fire(`${data.product_name} Added To WishList`);
             })
             .catch(error => {
                 console.error('Error:', error);
                 Swal.fire('An error occurred. Please try again later.');
             });
-    }, [user, updateWishList]);
+    };
 
-    const handleAddToCart = useCallback((data) => {
+    const handleAddToCart = async (data) => {
         const saveData = {
             product_name: data.product_name,
             price: data.price,
             images: data.images,
             email: user?.email,
-            userName: user?.displayName,
-            quantity: 1
+            userName: user?.displayName
+        };
+
+        try {
+            const response = await axiosSecure.post('/carts', saveData);
+            if (response.status === 201) {
+                refetchCart();
+                Swal.fire({
+                    icon: 'success',
+                    title: `'${saveData.product_name}' added to the cart.`,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        } catch (error) {
+            console.error('Error adding product to cart:', error);
+            Swal.fire(
+                'Error!',
+                'Failed to add the product to cart. Please try again later.',
+                'error'
+            );
         }
-        fetch('https://toold-kit-server.vercel.app/carts', {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(saveData)
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.insertedId) {
-                    refetchCart();
-                    Swal.fire({
-                        icon: 'success',
-                        title: `'${saveData.product_name}' added on the cart.`,
-                        showConfirmButton: false,
-                        timer: 1500
-                    })
-                }
-            })
-    }, [user, refetchCart]);
+    };
 
     return (
         <div>
@@ -181,19 +180,21 @@ export default function FeaturedProducts() {
                     ))
                 ) : (
                     collection.map((product) => (
-                        <Card key={product.id} sx={{ mx: '14px', boxShadow: 2, border: 1, borderColor: 'gray' }}>
-                            <CardContent sx={{ padding: 0 }}>
+                        <Card key={product._id} component={Paper} sx={{ display: 'flex', flexDirection: 'column', height: '100%', mx: '14px', boxShadow: 2, border: 1, borderColor: 'gray' }}>
+                            <CardContent sx={{ padding: 0, flexGrow: 1 }}>
                                 <CardMedia
                                     component="img"
                                     image={product.images[0]}
                                     alt="Product image"
-                                    sx={{ width: 200, height: 200, mx: 'auto' }}
+                                    sx={{ width: 200, height: 200, mx: 'auto', objectFit: 'cover' }}
                                 />
                                 <Box sx={{ p: 1 }}>
                                     <Typography variant='h6' sx={{ my: 1 }}>
                                         {product.product_name}
                                     </Typography>
-                                    <p className='text-sm text-gray-500' dangerouslySetInnerHTML={{ __html: product.description }}></p>
+                                    <Typography variant='body2' color='text.secondary'>
+                                        ${product.price}
+                                    </Typography>
                                 </Box>
                             </CardContent>
                             <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>

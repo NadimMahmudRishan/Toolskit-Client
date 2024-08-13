@@ -1,24 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "./useAuth";
-
+import useAxios from "./useAxios";
 
 const useCart = () => {
     const { user, loading } = useAuth();
-    const token = localStorage.getItem('access-token');
-    const { refetch, data: cart = [], isLoading } = useQuery({
+    const [axiosSecure] = useAxios();
+
+    const { refetch: cartRefetch, data: cart = [], isLoading } = useQuery({
         queryKey: ['carts', user?.email],
-        enabled: !loading,
+        enabled: !loading && !!user?.email,
         queryFn: async () => {
-            const res = await fetch(`https://toold-kit-server.vercel.app/carts?email=${user?.email}`, {
-                headers: {
-                    authorization: `bearer ${token}`
-                }
-            })
-            return res.json();
+            const { data } = await axiosSecure.get(`/shopping-cart`, {
+                params: { email: user?.email }
+            });
+            return data;
         },
-    })
-
-    return [cart, refetch, isLoading]
-
+    });
+    return [cart, cartRefetch, isLoading];
 }
+
 export default useCart;

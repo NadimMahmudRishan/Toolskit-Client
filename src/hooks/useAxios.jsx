@@ -1,14 +1,15 @@
+import { useEffect, useState } from 'react';
 import useAuth from './useAuth';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useEffect } from 'react';
 
 const useAxios = () => {
     const { LogOut } = useAuth();
     const navigate = useNavigate();
+    const [axiosError, setAxiosError] = useState(null);
 
     const axiosSecure = axios.create({
-        baseURL: 'https://toold-kit-server.vercel.app',
+        baseURL: 'http://localhost:5000/api',
     });
 
     useEffect(() => {
@@ -23,8 +24,11 @@ const useAxios = () => {
         axiosSecure.interceptors.response.use(
             (response) => response,
             async (error) => {
+                // console.log(error);
+                setAxiosError(error); // Set the axiosError state
+
                 if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                    await LogOut()
+                    await LogOut();
                     navigate('/');
                 }
                 return Promise.reject(error);
@@ -32,7 +36,7 @@ const useAxios = () => {
         );
     }, [LogOut, navigate, axiosSecure]);
 
-    return [axiosSecure];
+    return [axiosSecure, axiosError];
 };
 
 export default useAxios;

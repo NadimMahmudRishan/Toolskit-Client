@@ -2,14 +2,21 @@ import { useState } from "react";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import LinearProgress from '@mui/material/LinearProgress';
-import { TextField, Button, Grid, Typography, Select, MenuItem, InputLabel, FormControl, Box, Paper } from '@mui/material';
-import { useForm } from "react-hook-form";
+import { TextField, Button, Grid, Typography, Select, MenuItem, InputLabel, FormControl, Box, Paper, IconButton } from '@mui/material';
+import { useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
 import Swal from "sweetalert2";
 import DashboardTitle from "../../../components/DashboardTitle/DashboardTitle";
+import useAxios from "../../../hooks/useAxios";
+import { Add, Remove } from '@mui/icons-material';
 
 const AddProduct = () => {
-    const { register, handleSubmit, reset, formState: { errors } } = useForm();
+    const [axiosSecure] = useAxios();
+    const { register, handleSubmit, reset, control, formState: { errors } } = useForm();
+    const { fields: colorFields, append: addColorField, remove: removeColorField } = useFieldArray({
+        control,
+        name: 'colors' // Field array name
+    });
     const [imageUrls, setImageUrls] = useState([]);
     const [apiError, setApiError] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -17,6 +24,7 @@ const AddProduct = () => {
     const [richTextValue, setRichTextValue] = useState('');
     const [specificationValue, setSpecificationValue] = useState('');
     const [stockStatus, setStockStatus] = useState('In Stock');
+    const [review, setReview] = useState('');
 
     const modules = {
         toolbar: [
@@ -72,7 +80,8 @@ const AddProduct = () => {
         try {
             const price = parseFloat(data.Price);
             const category = data.category.toUpperCase();
-            const response = await axios.post('https://toold-kit-server.vercel.app/products', {
+            const colors = data.colors.map(color => color.trim()).filter(color => color); // Trim and filter out empty strings
+            const response = await axiosSecure.post('/products', {
                 product_name: data.Product_Name,
                 price: price,
                 quantity: data.Quantity,
@@ -80,6 +89,8 @@ const AddProduct = () => {
                 description: richTextValue,
                 specification: specificationValue,
                 stock_status: stockStatus,
+                colors: colors,
+                review: review,
                 images: imageUrls
             });
 
@@ -118,7 +129,7 @@ const AddProduct = () => {
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         '& fieldset': {
-                                            borderColor: 'default',
+                                            borderColor: '#b0b0b0',
                                         },
                                         '&:hover fieldset': {
                                             borderColor: '#CC3333',
@@ -128,7 +139,7 @@ const AddProduct = () => {
                                         },
                                     },
                                     '& .MuiInputLabel-root': {
-                                        color: 'default',
+                                        color: '#b0b0b0',
                                     },
                                     '&:hover .MuiInputLabel-root': {
                                         color: '#CC3333',
@@ -150,7 +161,7 @@ const AddProduct = () => {
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         '& fieldset': {
-                                            borderColor: 'default',
+                                            borderColor: '#b0b0b0',
                                         },
                                         '&:hover fieldset': {
                                             borderColor: '#CC3333',
@@ -160,7 +171,7 @@ const AddProduct = () => {
                                         },
                                     },
                                     '& .MuiInputLabel-root': {
-                                        color: 'default',
+                                        color: '#b0b0b0',
                                     },
                                     '&:hover .MuiInputLabel-root': {
                                         color: '#CC3333',
@@ -182,7 +193,7 @@ const AddProduct = () => {
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         '& fieldset': {
-                                            borderColor: 'default',
+                                            borderColor: '#b0b0b0',
                                         },
                                         '&:hover fieldset': {
                                             borderColor: '#CC3333',
@@ -192,7 +203,7 @@ const AddProduct = () => {
                                         },
                                     },
                                     '& .MuiInputLabel-root': {
-                                        color: 'default',
+                                        color: '#b0b0b0',
                                     },
                                     '&:hover .MuiInputLabel-root': {
                                         color: '#CC3333',
@@ -213,7 +224,7 @@ const AddProduct = () => {
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
                                         '& fieldset': {
-                                            borderColor: 'default',
+                                            borderColor: '#b0b0b0',
                                         },
                                         '&:hover fieldset': {
                                             borderColor: '#CC3333',
@@ -223,7 +234,7 @@ const AddProduct = () => {
                                         },
                                     },
                                     '& .MuiInputLabel-root': {
-                                        color: 'default',
+                                        color: '#b0b0b0',
                                     },
                                     '&:hover .MuiInputLabel-root': {
                                         color: '#CC3333',
@@ -234,121 +245,148 @@ const AddProduct = () => {
                                 }}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: 'default',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: '#CC3333',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: '#CC3333',
-                                        },
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: 'default',
-                                    },
-                                    '&:hover .MuiInputLabel-root': {
-                                        color: '#CC3333',
-                                    },
-                                    '& .MuiInputLabel-root.Mui-focused': {
-                                        color: '#CC3333',
-                                    },
-                                }}
-                            >
+                        <Grid item xs={12}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Colors
+                            </Typography>
+                            {colorFields.map((field, index) => (
+                                <Box key={field.id} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                    <TextField
+                                        fullWidth
+                                        label={`Color ${index + 1}`}
+                                        {...register(`colors.${index}`, { required: "Color is required" })}
+                                        error={Boolean(errors.colors?.[index])}
+                                        helperText={errors.colors?.[index]?.message}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: '#b0b0b0',
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: '#CC3333',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: '#CC3333',
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: '#b0b0b0',
+                                            },
+                                            '&:hover .MuiInputLabel-root': {
+                                                color: '#CC3333',
+                                            },
+                                            '& .MuiInputLabel-root.Mui-focused': {
+                                                color: '#CC3333',
+                                            },
+                                        }}
+                                    />
+                                    <IconButton onClick={() => removeColorField(index)} sx={{ ml: 1 }}>
+                                        <Remove />
+                                    </IconButton>
+                                </Box>
+                            ))}
+                            <Button variant="outlined" onClick={() => addColorField({ color: '' })}>
+                                Add Color
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth sx={{ mb: 2 }}>
                                 <InputLabel>Stock Status</InputLabel>
                                 <Select
                                     value={stockStatus}
                                     onChange={(e) => setStockStatus(e.target.value)}
-                                    label="Stock Status"
                                 >
                                     <MenuItem value="In Stock">In Stock</MenuItem>
                                     <MenuItem value="Out of Stock">Out of Stock</MenuItem>
+                                    <MenuItem value="Pre Order">Pre Order</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
                         <Grid item xs={12}>
-                            <Typography variant="h6" sx={{ mb: 1, fontWeight: ' bold' }}>
-                                Product Specification
-                            </Typography>
-                            <ReactQuill
-                                theme="snow"
-                                value={specificationValue}
-                                onChange={setSpecificationValue}
-                                modules={modules}
-                                formats={formats}
-                                placeholder="Product Specification"
-                                style={{ height: '200px' }} // Adjust height as needed
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography variant="h6" sx={{ mb: 1, mt: 4, fontWeight: 'bold' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                                 Product Description
                             </Typography>
                             <ReactQuill
-                                theme="snow"
                                 value={richTextValue}
                                 onChange={setRichTextValue}
                                 modules={modules}
                                 formats={formats}
-                                placeholder="Product Description"
-                                style={{ height: '200px' }} // Adjust height as needed
+                                theme="snow"
+                                style={{ minHeight: '200px' }}
                             />
                         </Grid>
-                        <Grid item xs={12} sx={{ mt: 4 }}>
+                        <Grid item xs={12}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Product Specifications
+                            </Typography>
+                            <ReactQuill
+                                value={specificationValue}
+                                onChange={setSpecificationValue}
+                                modules={modules}
+                                formats={formats}
+                                theme="snow"
+                                style={{ minHeight: '200px' }}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Product Reviews
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={4}
+                                value={review}
+                                onChange={(e) => setReview(e.target.value)}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: '#b0b0b0',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#CC3333',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: '#b0b0b0',
+                                    },
+                                    '&:hover .MuiInputLabel-root': {
+                                        color: '#CC3333',
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#CC3333',
+                                    },
+                                }}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                Product Images
+                            </Typography>
                             <input
                                 type="file"
-                                onChange={handleFileChange}
-                                multiple
                                 accept="image/*"
-                                style={{ width: '100%', marginBottom: '16px' }}
+                                multiple
+                                onChange={handleFileChange}
                             />
-                            {uploadProgress > 0 && (
-                                <Box sx={{ mt: 2 }}>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={uploadProgress}
-                                        color="warning"
-                                    />
-                                    <Typography variant="caption" color="textSecondary">
-                                        Upload Progress: {uploadProgress}%
-                                    </Typography>
+                            {isUploading && <LinearProgress variant="determinate" value={uploadProgress} sx={{ my: 2 }} />}
+                            {apiError && <Typography color="error">{apiError}</Typography>}
+                            {imageUrls.length > 0 && (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, my: 3 }}>
+                                    {imageUrls.map((url, index) => (
+                                        <img key={index} src={url} alt={`Product ${index}`} style={{ width: 100, height: 100, objectFit: 'cover' }} />
+                                    ))}
                                 </Box>
                             )}
                         </Grid>
                         <Grid item xs={12}>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                color="primary"
-                                sx={{
-                                    bgcolor: "#CC3333",
-                                    '&:hover': {
-                                        bgcolor: "#B02D2D"
-                                    }
-                                }}
-                                disabled={isUploading}
-                            >
-                                {isUploading ? 'Submitting...' : 'Submit'}
-                            </Button>
-                            <Button
-                                type="reset"
-                                variant="outlined"
-                                color="secondary"
-                                sx={{ ml: 2 }}
-                                onClick={() => reset()}
-                            >
-                                Reset
+                            <Button variant="contained" color="primary" type="submit" fullWidth>
+                                Add Product
                             </Button>
                         </Grid>
-                        {apiError && <Grid item xs={12}>
-                            <Typography color="error" variant="body2">
-                                Error: {apiError}
-                            </Typography>
-                        </Grid>}
                     </Grid>
                 </form>
             </Paper>

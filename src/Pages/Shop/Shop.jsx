@@ -10,19 +10,21 @@ import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import { useQuery } from '@tanstack/react-query';
 import useAxios from '../../hooks/useAxios';
-import { Box, Container, Grid, Paper } from '@mui/material';
+import { Box, Container, Grid, Paper, Skeleton, Pagination } from '@mui/material';
 import Swal from 'sweetalert2';
 import useAuth from '../../hooks/useAuth';
 import useCart from '../../hooks/useCart';
 import useWishList from '../../hooks/useWishList';
 import Modals from '../../components/Modals/Modals';
 import SectionTitle from '../../components/SectionTitle/SectionTitle';
-import Skeleton from '@mui/material/Skeleton';
+
+const PAGE_SIZE = 8;
 
 export default function RecipeReviewCard() {
     const { user } = useAuth();
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [, refetch] = useCart();
+    const [page, setPage] = useState(1);
+    const [, refetchCart,] = useCart();
     const [, updateWishList] = useWishList();
 
     const [axiosSecure] = useAxios();
@@ -37,6 +39,9 @@ export default function RecipeReviewCard() {
             }
         },
     });
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(collection.length / PAGE_SIZE);
 
     const handleOpenModal = (product) => {
         setSelectedProduct(product);
@@ -54,7 +59,7 @@ export default function RecipeReviewCard() {
             email: user?.email,
             userName: user?.displayName,
         }
-        fetch('https://toold-kit-server.vercel.app/wish-List', {
+        fetch('http://localhost:5000/api/wish-list', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -63,9 +68,8 @@ export default function RecipeReviewCard() {
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data);
                 updateWishList();
-                Swal.fire('Added To WishList');
+                Swal.fire(`${data.product_name} Added To WishList`);
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -73,48 +77,53 @@ export default function RecipeReviewCard() {
             });
     };
 
-    const handleAddToCart = (data) => {
+    const handleAddToCart = async (data) => {
         const saveData = {
             product_name: data.product_name,
             price: data.price,
             images: data.images,
             email: user?.email,
-            userName: user?.displayName,
-            quantity: 1
+            userName: user?.displayName
+        };
+
+        try {
+            const response = await axiosSecure.post('/carts', saveData);
+            if (response.status === 201) {
+                refetchCart();
+                Swal.fire({
+                    icon: 'success',
+                    title: `'${saveData.product_name}' added to the cart.`,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        } catch (error) {
+            console.error('Error adding product to cart:', error);
+            Swal.fire(
+                'Error!',
+                'Failed to add the product to cart. Please try again later.',
+                'error'
+            );
         }
-        fetch('https://toold-kit-server.vercel.app/carts', {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(saveData)
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.insertedId) {
-                    refetch();
-                    Swal.fire({
-                        icon: 'success',
-                        title: `'${saveData.product_name}' added on the cart.`,
-                        showConfirmButton: false,
-                        timer: 1500
-                    })
-                }
-            })
-    }
+    };
+
+
+    const handlePageChange = (event, newPage) => {
+        setPage(newPage);
+    };
 
     return (
         <div className='min-h-screen mb-20'>
-            <SectionTitle heading="Shop" subHeading='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in feugiat lorem.'></SectionTitle>
+            <SectionTitle heading="Shop" subHeading='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in feugiat lorem.' />
             <Container>
                 <Grid container spacing={4}>
                     {isLoading ? (
                         // Show Skeleton Loading when data is loading
-                        Array.from(new Array(8)).map((_, index) => (
+                        Array.from(new Array(PAGE_SIZE)).map((_, index) => (
                             <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
-                                <Card className='w-80 lg:w-full'>
-                                    <Skeleton variant="rectangular" height={194} />
-                                    <CardContent>
+                                <Card className='w-80 lg:w-full' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                    <Skeleton variant="rectangular" height={200} />
+                                    <CardContent sx={{ flexGrow: 1 }}>
                                         <Skeleton variant="text" />
                                         <Skeleton variant="text" />
                                         <Skeleton variant="text" />
@@ -124,11 +133,11 @@ export default function RecipeReviewCard() {
                                             <IconButton aria-label="add to favorites">
                                                 <FavoriteIcon />
                                             </IconButton>
-                                            <IconButton aria-label="share">
+                                            <IconButton aria-label="add to cart">
                                                 <ShoppingCartCheckoutIcon />
                                             </IconButton>
                                         </Box>
-                                        <IconButton aria-label="modal">
+                                        <IconButton aria-label="view details">
                                             <AspectRatioIcon />
                                         </IconButton>
                                     </CardActions>
@@ -137,21 +146,23 @@ export default function RecipeReviewCard() {
                         ))
                     ) : (
                         // Render actual product cards when data is loaded
-                        collection.map((product, index) => (
+                        collection.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((product, index) => (
                             <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
-                                <Card component={Paper} key={product.id} sx={{ boxShadow: 3 }}>
-                                    <CardContent sx={{ padding: 0 }}>
+                                <Card component={Paper} sx={{ boxShadow: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                    <CardContent sx={{ padding: 0, flexGrow: 1 }}>
                                         <CardMedia
                                             component="img"
                                             image={product.images[0]}
                                             alt="Product image"
-                                            sx={{ width: 200, height: 200, mx: 'auto' }}
+                                            sx={{ width: 200, height: 200, mx: 'auto', objectFit: 'cover' }}
                                         />
                                         <Box sx={{ p: 1 }}>
                                             <Typography variant='h6' sx={{ my: 1 }}>
                                                 {product.product_name}
                                             </Typography>
-                                            <p className='text-sm text-gray-500' dangerouslySetInnerHTML={{ __html: product.description }}></p>
+                                            <Typography variant='body2' color='text.secondary'>
+                                                ${product.price}
+                                            </Typography>
                                         </Box>
                                     </CardContent>
                                     <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
@@ -172,8 +183,17 @@ export default function RecipeReviewCard() {
                         ))
                     )}
                 </Grid>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={handlePageChange}
+                        variant="outlined"
+                        color="error"
+                    />
+                </Box>
             </Container>
-            <Modals selectedProduct={selectedProduct} handleCloseModal={handleCloseModal}></Modals>
+            <Modals selectedProduct={selectedProduct} handleCloseModal={handleCloseModal} />
         </div>
     );
 }

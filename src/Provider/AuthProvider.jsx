@@ -1,8 +1,8 @@
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateEmail, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getAuth } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
-import axios from "axios";
 import app from "../firebase/firebase.config";
+import { Box, LinearProgress } from "@mui/material";
 
 export const AuthContext = createContext();
 const auth = getAuth(app);
@@ -11,60 +11,50 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const createUser = (email, password) => {
+    const createUser = async (email, password) => {
         setLoading(true);
-        return createUserWithEmailAndPassword(auth, email, password);
-    };
-
-    const signIn = (email, password) => {
-        setLoading(true);
-        return signInWithEmailAndPassword(auth, email, password);
-    };
-
-    const logOut = () => {
-        setLoading(true);
-        return signOut(auth);
-    }
-
-    const updateUserProfile = (name, photo) => {
-        return updateProfile(auth.currentUser, {
-            displayName: name, photoURL: photo
-        });
-    }
-    const updateUserEmail = (email) => {
-        return updateEmail(auth.currentUser, email);
-    }
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, currentUser => {
-            setUser(currentUser);
-
-            if (currentUser) {
-                // Persist user data in localStorage
-                localStorage.setItem('user', JSON.stringify(currentUser));
-                axios.post('https://toold-kit-server.vercel.app/jwt', { email: currentUser.email })
-                    .then(data => {
-                        localStorage.setItem('access-token', data.data.token)
-                        setLoading(false);
-                    })
-            }
-            else {
-                // Clear localStorage if user is null
-                localStorage.removeItem('user');
-                localStorage.removeItem('access-token');
-            }
-            setLoading(false); // Set loading to false after authentication state is updated
-        });
-        return unsubscribe;
-    }, []);
-
-    useEffect(() => {
-        // Check if user data exists in localStorage on component mount
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            return userCredential;
+        } catch (error) {
+            console.error('Error creating user:', error);
+            throw error;
+        } finally {
+            setLoading(false);
         }
-        setLoading(false); // Set loading to false after checking localStorage
+    };
+
+    const signIn = async (email, password) => {
+        setLoading(true);
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            return userCredential;
+        } catch (error) {
+            console.error('Error signing in:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const logOut = async () => {
+        setLoading(true);
+        try {
+            await signOut(auth);
+        } catch (error) {
+            console.error('Error signing out:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
+        });
+        return () => unsubscribe();
     }, []);
 
     const authInfo = {
@@ -73,9 +63,13 @@ const AuthProvider = ({ children }) => {
         signIn,
         loading,
         logOut,
-        updateUserProfile,
-        updateUserEmail
     };
+
+    if (loading) {
+        return <Box sx={{ width: '100%' }}>
+            <LinearProgress color="error" />
+        </Box>
+    }
 
     return (
         <AuthContext.Provider value={authInfo}>

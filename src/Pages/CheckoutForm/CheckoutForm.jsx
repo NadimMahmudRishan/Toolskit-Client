@@ -3,9 +3,8 @@ import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import './Common.css'
 import { useLocation, useNavigate } from "react-router-dom";
 import './Checkout.css'
-
-import { Helmet } from "react-helmet";
 import { Skeleton } from "@mui/material";
+import useAxios from "../../hooks/useAxios";
 
 const CARD_OPTIONS = {
     iconStyle: "solid",
@@ -31,12 +30,12 @@ const CARD_OPTIONS = {
 };
 
 const CheckoutForm = ({ price, paymentInfo, carts }) => {
-    console.log(carts)
     const stripe = useStripe();
     const elements = useElements();
     const location = useLocation();
     const navigate = useNavigate();
     const from = location.state?.from?.pathname || "/";
+    const [axiosSecure] = useAxios();
 
 
 
@@ -68,20 +67,13 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
         if (price > 0) {
             const fetchClientSecret = async () => {
                 try {
-                    const response = await fetch("https://toold-kit-server.vercel.app/create-payment-intent", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ price }),
-                    });
+                    const response = await axiosSecure.post("/create-payment-intent", { price });
 
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch client secret: ${response.statusText}`);
+                    if (!response.data) {
+                        throw new Error("Failed to fetch client secret");
                     }
 
-                    const data = await response.json();
-                    setClientSecret(data.clientSecret);
+                    setClientSecret(response.data.clientSecret);
                 } catch (error) {
                     console.error(error);
                     setError({ message: error.message || "Failed to fetch client secret" });
@@ -90,7 +82,7 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
 
             fetchClientSecret();
         }
-    }, [price]);
+    }, [price, axiosSecure]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -120,14 +112,23 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
                 card,
                 billing_details: billingDetails,
             });
-            const { paymentIntent, error } = await stripe.confirmCardPayment(
+
+            if (!payload.paymentMethod) {
+                throw new Error("Failed to create payment method.");
+            }
+
+            const { paymentIntent, error: paymentError } = await stripe.confirmCardPayment(
                 clientSecret,
                 {
                     payment_method: payload.paymentMethod.id,
                 }
             );
+
             setProcessing(false);
 
+            if (paymentError) {
+                throw paymentError;
+            }
 
             if (paymentIntent && paymentIntent.status === 'succeeded') {
                 setTransactionId(paymentIntent.id);
@@ -142,36 +143,28 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
                     type: payload.paymentMethod.type
                 };
 
-                fetch('https://toold-kit-server.vercel.app/payments', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(postData)
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        console.log('data: ', data);
-                        if (data.insertedId) {
-                            // display success message or perform other actions
+                try {
+                    const response = await axiosSecure.post('/payments', postData);
 
-                        }
-                    });
-            }
-
-            if (error) {
-                setError(error.message ? error : { message: "Payment failed. Please try again." });
-                // Handle specific error codes if needed
+                    if (!response.data.insertedId) {
+                        throw new Error("Failed to save payment.");
+                    }
+                } catch (postError) {
+                    console.error('Payment saving error:', postError);
+                }
             } else {
-                setPaymentMethod(payload.paymentMethod);
+                throw new Error("Payment failed. Please try again.");
             }
 
+            setPaymentMethod(payload.paymentMethod);
 
         } catch (error) {
             console.error(error);
-            setError({ message: "Payment failed. Please try again." });
+            setProcessing(false);
+            setError({ message: error.message || "Payment failed. Please try again." });
         }
     };
+
 
     const reset = () => {
         setError(null);
@@ -240,9 +233,9 @@ const CheckoutForm = ({ price, paymentInfo, carts }) => {
                     <p className="pt-4">Redirecting to home page in {countdown} seconds...</p>
                 </div>
             )}
-            {/* <button type="button" onClick={reset}>
+            <button type="button" onClick={reset}>
                 Reset
-            </button> */}
+            </button>
         </div>
     ) : (
 

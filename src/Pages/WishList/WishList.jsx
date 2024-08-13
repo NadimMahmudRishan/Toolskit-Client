@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableRow, TablePagination, IconButton, Button, Skeleton } from "@mui/material";
+import { Table, TableBody, TableCell, TableHead, TableRow, TablePagination, IconButton, Button, Skeleton, Container } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import useWishList from "../../hooks/useWishList";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
+import useAxios from "../../hooks/useAxios";
+import axios from "axios";
+import useCart from "../../hooks/useCart";
 
 const WishList = () => {
+    const [axiosSecure] = useAxios();
     const { user } = useAuth();
     const [products, refetch, isLoading] = useWishList();
+    const [, cartRefetch,] = useCart();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -33,13 +38,8 @@ const WishList = () => {
             });
 
             if (result.isConfirmed) {
-                const response = await fetch(`https://toold-kit-server.vercel.app/delete-product/wishList/${id}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (data.deletedCount > 0) {
+                const response = await axios.delete(`http://localhost:5000/api/delete-product/wishList/${id}`);
+                if (response.status === 200) {
                     refetch();
                     Swal.fire(
                         'Deleted!',
@@ -68,18 +68,10 @@ const WishList = () => {
         };
 
         try {
-            const response = await fetch('https://toold-kit-server.vercel.app/carts', {
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify(saveData)
-            });
+            const response = await axiosSecure.post('/carts', saveData);
 
-            const responseData = await response.json();
-
-            if (responseData.insertedId) {
-                refetch();
+            if (response.status === 201) {
+                cartRefetch()
                 Swal.fire({
                     icon: 'success',
                     title: `'${saveData.product_name}' added to the cart.`,
@@ -98,7 +90,7 @@ const WishList = () => {
     };
 
     return (
-        <div className="mx-40 my-10">
+        <Container sx={{ p: 5 }}>
             <h1 className="text-4xl font-bold pb-2">WishList</h1>
             <Table>
                 <TableHead sx={{ backgroundColor: 'white' }}>
@@ -183,7 +175,7 @@ const WishList = () => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
-        </div>
+        </Container>
     );
 };
 
