@@ -43,7 +43,7 @@ const SignUp = () => {
         if (passwordValidation === true) {
             if (data.password === data.confirmPassword) {
                 try {
-                    await fetch('http://localhost:5000/api/users/create', {
+                    await fetch('https://toolskit-mongoose-server.vercel.app/api/users/create', {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

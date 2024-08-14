@@ -9,7 +9,7 @@ const useAxios = () => {
     const [axiosError, setAxiosError] = useState(null);
 
     const axiosSecure = axios.create({
-        baseURL: 'http://localhost:5000/api',
+        baseURL: 'https://toolskit-mongoose-server.vercel.app/api',
     });
 
     useEffect(() => {

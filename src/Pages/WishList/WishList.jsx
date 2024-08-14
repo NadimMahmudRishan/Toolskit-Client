@@ -38,7 +38,7 @@ const WishList = () => {
             });
 
             if (result.isConfirmed) {
-                const response = await axios.delete(`http://localhost:5000/api/delete-product/wishList/${id}`);
+                const response = await axios.delete(`https://toolskit-mongoose-server.vercel.app/api/delete-product/wishList/${id}`);
                 if (response.status === 200) {
                     refetch();
                     Swal.fire(

@@ -53,7 +53,7 @@ const Details = () => {
             email: user?.email,
             userName: user?.displayName,
         }
-        fetch('http://localhost:5000/api/wish-list', {
+        fetch('https://toolskit-mongoose-server.vercel.app/api/wish-list', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'

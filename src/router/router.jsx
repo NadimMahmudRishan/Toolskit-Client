@@ -18,10 +18,11 @@ import ShoppingCart from "../Pages/ShoppingCart/ShoppingCart";
 import MyPayments from "../Pages/MyPayments/MyPayments";
 import Search from "../Pages/Search/Search";
 import AdminRoute from "./AdminRoute";
-import Details from "../Pages/Deatils/Details";
+import Details from "../Pages/Details/Details";
 import Blog from "../Pages/Blog/Blog";
-import Contact from "../Pages/Conatct/Conatct";
+import Contact from "../Pages/Contact/Contact";
 import RecipeReviewCard from "../Pages/Shop/Shop";
+import LoginRoute from "./LoginRoute";
 
 
 const router = createBrowserRouter([
@@ -36,7 +37,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'login',
-                element: <Login></Login>
+                element: <LoginRoute><Login></Login></LoginRoute>
             },
             {
                 path: 'signUp',
@@ -69,7 +70,7 @@ const router = createBrowserRouter([
             {
                 path: 'details/:id',
                 element: <Details></Details>,
-                loader: ({ params }) => fetch(`http://localhost:5000/api/collection/${params.id}`)
+                loader: ({ params }) => fetch(`https://toolskit-mongoose-server.vercel.app/api/collection/${params.id}`)
             },
             {
                 path: 'blog',

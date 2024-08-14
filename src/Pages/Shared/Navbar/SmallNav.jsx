@@ -10,7 +10,7 @@ const SmallNav = () => {
         event.preventDefault();
         const searchValue = event.target.search.value;
         setLoading(true)
-        fetch(`http://localhost:5000/api/product?product_name=${searchValue}`)
+        fetch(`https://toolskit-mongoose-server.vercel.app/api/product?product_name=${searchValue}`)
             .then((res) => res.json())
             .then((data) => {
 
