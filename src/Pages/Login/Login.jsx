@@ -6,7 +6,7 @@ import { TextField, Button, Typography, InputAdornment, IconButton, FormControl,
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
-import { Helmet } from "react-helmet";
+// import { Helmet } from "react-helmet";
 import GetDeviceInfo from "../../components/GetDeviceInfo/GetDeviceInfo";
 import useAuth from "../../hooks/useAuth";
 import useAxios from "../../hooks/useAxios";
@@ -108,9 +108,9 @@ const Login = () => {
 
     return (
         <div className="lg:hero min-h-screen lg:bg-base-200">
-            <Helmet>
-                <title>{`Login - Bank Management`}</title>
-            </Helmet>
+            {/* <Helmet>
+                <title>{`Login`}</title>
+            </Helmet> */}
             <div className="lg:hero-content flex-col lg:w-full">
                 <div className="card flex-shrink-0 w-full lg:max-w-md lg:shadow-2xl bg-base-100 rounded-sm">
                     <div className="card-body">
