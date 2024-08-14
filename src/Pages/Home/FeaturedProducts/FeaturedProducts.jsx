@@ -10,6 +10,7 @@ import useWishList from '../../../hooks/useWishList';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import Modals from '../../../components/Modals/Modals';
+import { Link } from 'react-router-dom';
 
 export default function FeaturedProducts() {
     const { user } = useAuth();
@@ -181,22 +182,24 @@ export default function FeaturedProducts() {
                 ) : (
                     collection.map((product) => (
                         <Card key={product._id} component={Paper} sx={{ display: 'flex', flexDirection: 'column', height: '100%', mx: '14px', boxShadow: 2, border: 1, borderColor: 'gray' }}>
-                            <CardContent sx={{ padding: 0, flexGrow: 1 }}>
-                                <CardMedia
-                                    component="img"
-                                    image={product.images[0]}
-                                    alt="Product image"
-                                    sx={{ width: 200, height: 200, mx: 'auto', objectFit: 'cover' }}
-                                />
-                                <Box sx={{ p: 1 }}>
-                                    <Typography variant='h6' sx={{ my: 1 }}>
-                                        {product.product_name}
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        ${product.price}
-                                    </Typography>
-                                </Box>
-                            </CardContent>
+                            <Link to={`/details/${product._id}`}>
+                                <CardContent sx={{ padding: 0, flexGrow: 1 }}>
+                                    <CardMedia
+                                        component="img"
+                                        image={product.images[0]}
+                                        alt="Product image"
+                                        sx={{ width: 200, height: 200, mx: 'auto', objectFit: 'cover' }}
+                                    />
+                                    <Box sx={{ p: 1 }}>
+                                        <Typography variant='h6' sx={{ my: 1 }}>
+                                            {product.product_name}
+                                        </Typography>
+                                        <Typography variant='body2' color='text.secondary'>
+                                            ${product.price}
+                                        </Typography>
+                                    </Box>
+                                </CardContent>
+                            </Link>
                             <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }} disableSpacing>
                                 <Box>
                                     <IconButton aria-label="add to favorites" onClick={() => handleWishList(product)}>
