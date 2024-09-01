@@ -93,7 +93,7 @@ const Search = () => {
         <div>
             <div className='min-h-screen mb-20'>
                 <SectionTitle heading="Search Result" subHeading='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in feugiat lorem.'></SectionTitle>
-                <Grid sx={{ maxWidth: 1300, mx: 'auto' }} container spacing={4}>
+                <Grid sx={{ maxWidth: { xs: 320 }, mx: 'auto' }} spacing={4}>
                     {searchResults.map((product, index) => (
                         <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
                             <Card component={Paper} sx={{ boxShadow: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
