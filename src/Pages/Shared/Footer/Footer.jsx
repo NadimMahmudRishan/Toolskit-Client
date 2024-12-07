@@ -15,8 +15,8 @@ const Footer = () => {
                         <h1>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in feugiat lorem. Pellentque ac placerat tellus.</h1>
                         <ol className='col-span-0  space-y-1 mt-4'>
                             <li className='flex items-center gap-2'><TiWorld />
-                                715 Fake Street, New York 10021 USA</li>
-                            <li className='flex items-center gap-2'><CiMail /> stroyka@example.com</li>
+                                YKSG-2, Ashulia, Shavar, Dhaka</li>
+                            <li className='flex items-center gap-2'><CiMail /> rishan35-952@diu.edu.bd</li>
                             <li className='flex items-center gap-2'> <IoPhonePortraitSharp />(800) 060-0730, (800) 060-0730</li>
                             <li className='flex items-center gap-2'><LuClock />Mon-Sat 10:00pm - 7:00pm</li>
                         </ol>
